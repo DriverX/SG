@@ -275,8 +275,7 @@ that must be nulled. Need this only to generic case
 
 window.yassmod = _;
 
-})( window, document );
-(function( window, document, yass, undefined ) {
+})( window, document );;(function( window, document, yass, undefined ) {
 	
 var	
 	isOpera = /opera/i.test( navigator.userAgent ) && !!window.opera,
@@ -1613,8 +1612,6 @@ function Suggest( inputOptions ) {
 	}
 	
 	
-	
-	
 	function getVal() {
 		return $field.value;
 	}
@@ -2117,17 +2114,28 @@ function Suggest( inputOptions ) {
 			i = 0,
 			itemData,
 			$item,
+			builderData,
+			builderExtraData,
 			itemBuilder = isFunction( options.item ) ? options.item : SGUtils.tmpl( options.item );
-			
+		
+		if( options.itemExtraData && SGUtils.isObj(options.itemExtraData)) {
+			builderExtraData = options.itemExtraData;
+		}
+		
 		for( ; i < l; i++ ) {
 			itemData = viewItemsData[ i ];
 			
-			$item = itemBuilder({
+			builderData = {
 				itemData: itemData,
 				fullData: viewData,
 				index: i,
 				value: viewValue
-			});
+			};
+			if( builderExtraData ) {
+				SGUtils.ext(builderData, builderExtraData);
+			}
+			
+			$item = itemBuilder( builderData );
 			
 			if( $item && typeof $item === "string" ) {
 				$item = SGUtils.cre( $item );
@@ -3160,6 +3168,15 @@ Suggest.opts = {
 	debug: false
 };
 
+// detect dataURI support 
+SGUtils.suppDataURI = false;
+var tmp_img = new Image;
+Evt.add(tmp_img, "load error", function( event ) {
+	Evt.rm(tmp_img, "load error");
+	SGUtils.suppDataURI = event.type === "load";
+	tmp_img = null;
+});
+tmp_img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
 
 // Расшариваем утилиты. Мало ли кому понадобятся =)
 Suggest.utils = SGUtils;

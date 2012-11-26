@@ -6,7 +6,8 @@ module.exports = function( grunt ) {
     concat: {
       dist: {
         src: ["lib/yass.mod.js", "lib/sg.js"],
-        dest: "<%= files.name %>.js"
+        dest: "<%= files.name %>.js",
+        separator: ";"
       }
     },
     min: {
