@@ -4,6 +4,99 @@
 	<meta charset="utf-8">
 	<title>test page</title>
 	<script src="@@script_src"></script>
+	<style>
+/* SUGGESTS */
+.go-suggests {
+  position: absolute;
+  margin-top: -5px;
+  margin-left: -1px;
+  display: none;
+  font: normal 12px arial, sans-serif; 
+  z-index: 102;
+  -moz-box-shadow:  0 2px 3px -1px #D9D9D9;
+  -webkit-box-shadow: 0 2px 3px -1px #D9D9D9;
+  -o-box-shadow:    0 2px 3px -1px #D9D9D9;
+  box-shadow:     0 2px 3px -1px #D9D9D9;
+  }
+.go-suggests_open {
+  display: block;
+  }
+.go-suggests__brd-overlay {
+  border-left: 1px solid #3a78b9;
+  width: 4px;
+  height: 5px;
+  overflow: hidden;
+  background: #fff;
+  }
+.go-suggests__wrap {
+  border: 1px solid #3a78b9;
+  border-top: 0;
+  background: #fff;
+  }
+.go-suggests__helpwrap {
+  border-top: 1px solid #ebeff4;
+  }
+.go-suggests__items {
+  padding: 1px 0;
+  }
+.go-suggests__item {
+  color: #000;
+  font-size: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  }
+.go-suggests__item__content {
+  padding: 3px 10px 5px;
+  min-width: 418px;
+  height: 16px;
+  line-height: 16px;
+  }
+.go-suggests__item_hover {
+  background: #e1edfb;
+  }
+.go-suggests__item__highlight,
+.go-suggests__item b {
+  color: #858585;
+  font-weight: normal;
+  }
+.go-suggests__item__link,
+.go-suggests__item__link:hover,
+.go-suggests__item__link:active,
+.go-suggests__item__link:visited {
+  color: #0857a6;
+  text-decoration: none;
+  }
+.go-suggests__loading {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: none;
+  width: 16px;
+  height: 16px;
+  background: url(//go.imgsmail.ru/img/ajax_loader_mc.gif) 0 0 no-repeat;
+  }
+.go-suggests__item__text {
+  vertical-align: top;
+  }
+.go-suggests__item__favicon {
+  float: left;
+  margin-top: 1px;
+  margin-right: 5px;
+  width: 16px;
+  height: 16px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAB50RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNS4xqx9I6wAAABZ0RVh0Q3JlYXRpb24gVGltZQAwNC8xMi8xMoruciUAAAHXSURBVDiNbZOhjiJBEIY/CB7uCdjzJDcGuVnOYBDDOQTJ9VkE8AjcExyLwGBaIDAkg8SxIDFDwgPMvQHo+hNObLM7N6GSSrrrr/r7r0pX6Xa7kbfz+ewAB7wA1xCuAhsgaTQaPp9fuhOkaRoBHviWw3+EWDUXOwHdKIqyD4Lj8RgBOyADauGcAt2gpGhXIGo2m1kZQJKX5JvNZiSpJekiyUmKJPHAq5ISgNJ+v3fA+Pn5OTocDhNgXJB8DfdXYFRQ8qtiZg6YAphZGoDfQAK0gD8h5grFfwFX2m63N+ALcB9i/UG/06AsDWcffFQ2s2u73b6YWc3M6mZGwasB25nZpN1uJ2Y2DvdrRRJhkA+G/WGjIDkD6HQ6HmCz2VCWVF2v109xHCeSvkr6LuntweR3cRxnd8b1el2TVK2Y2QnYrVarqNfrZeGV1mq18sDPnIpJXpKZdYG3sqSppHqxBUlJQUFruVz6HD6R5Mv9ft9LOkmaFAguueKTpJ2kKYD33ku69Pt9Xw5ynJm5xWIxvRM453Zm9mpmGzNzzrnMOZcuFgtvZt3QwucyzefzJ94/Ty30mwwGg0vAarzvxQS4AN3BYJD9R3C32WzmQnLM5zeGsM7D4dDn8/8BmZJiG/Ej23sAAAAASUVORK5CYII=) 0 0 no-repeat;
+  }
+.go-suggests__item__musico {
+  display: inline-block;
+  margin: 2px 0 0 10px;
+  width: 17px;
+  height: 13px;
+  overflow: hidden;
+  background: url(//go.imgsmail.ru/img/mail/go-form32.png) 0 -375px no-repeat;
+  vertical-align: top;
+  }
+/* /SUGGESTS */
+	</style>
 </head>
 <body>
 
@@ -49,6 +142,9 @@
 <script>
 var sg_instance = SG({
 	field: "#q"
+});
+SG.utils.Event.add(SG.utils.$("#q").form, function() {
+	
 });
 sg_instance.enable();
 </script>
