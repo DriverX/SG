@@ -14,8 +14,11 @@ module.exports = function( grunt ) {
         src: ["<config:concat.dist.dest>"],
         dest: "<%= files.name %>.min.js"
       }
+    },
+    lint: {
+      files: ["grunt.js"]
     }
   });
   
-  grunt.registerTask("default", "concat min");
+  grunt.registerTask("default", "lint concat min");
 };
