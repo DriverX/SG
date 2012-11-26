@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>test page</title>
+	<script src="@@script_src"></script>
+</head>
+<body>
+
+
+<form action="http://go.mail.ru/search" action="get">
+	<input id="q" type="search" name="q" value="">
+	<input type="submit" value="Search">
+</form>
+
+<div class="go-suggests">
+    <div class="go-suggests__wrap">
+        <div class="go-suggests__helpwrap">
+            <div class="go-suggests__items"></div>
+            <div class="go-suggests__loading"></div>
+        </div>
+    </div>
+</div>
+
+<script id="go-suggests__suggest-tmpl" class="go-suggests__suggest-tmpl" type="text/jstmpl">
+    <div class="go-suggests__item">
+        <div class="go-suggests__item__content">
+            <% if( itemData.type === "site" ) { %>
+                <a class="go-suggests__item__link" href="<%= itemData.link %>">
+                    <% if( SG.utils.suppDataURI ) { %>
+                        <i
+                            class="go-suggests__item__favicon"
+                            <% if( itemData.favicon ) { %>
+                                style="background-image:url(data:image/png;base64,<%= itemData.favicon %>);"
+                            <% } %>
+                        ></i>
+                    <% } %>
+                    <%= itemData.site %>
+                </a>
+            <% } else { %>
+                <span class="go-suggests__item__text"
+                    ><%= ( itemData.textMarked || itemData.text ) %></span
+                ><% if( itemData.mus ) { %><span class="go-suggests__item__musico"></span><% } %>
+            <% } %>
+        </div>
+    </div>
+</script>
+
+<script>
+var sg_instance = SG({
+	field: "#q"
+});
+sg_instance.enable();
+</script>
+
+
+</body>
+</html>

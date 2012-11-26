@@ -1,2 +1,5 @@
 /.project
 /.settings
+/server.js
+/dist
+/node_modules

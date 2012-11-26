@@ -275,7 +275,8 @@ that must be nulled. Need this only to generic case
 
 window.yassmod = _;
 
-})( window, document );;(function( window, document, yass, undefined ) {
+})( window, document );
+(function( window, document, yass, undefined ) {
 	
 var	
 	isOpera = /opera/i.test( navigator.userAgent ) && !!window.opera,
@@ -1567,6 +1568,10 @@ var jsonpCallbackPrefix = "cb" + EXPANDO,
 function Suggest( inputOptions ) {
 	var self = this;
 	
+	if (!(self instanceof Suggest)) {
+		return new Suggest(inputOptions);	
+	}
+	
 	
 	/**
 	 * Добавляет обработчик события на экзмпляр
@@ -1916,7 +1921,7 @@ function Suggest( inputOptions ) {
 							
 							var dataFilter = options.dataFilter;
 							if( isFunction( dataFilter ) ) {
-								response = dataFilter( response, value );
+								response = dataFilter.call( self, response, value );
 							}
 							
 							// Удаляем объект запроса из стека
@@ -2052,7 +2057,7 @@ function Suggest( inputOptions ) {
 		
 		viewValue = value;
 		viewData = data;
-		viewItemsData = viewData && isFunction( getData ) ? getData( viewData ) : viewData;
+		viewItemsData = viewData && isFunction( getData ) ? getData.call( self, viewData ) : viewData;
 		
 		var needClose = false;
 		if( !viewData ||
@@ -2135,7 +2140,7 @@ function Suggest( inputOptions ) {
 				SGUtils.ext(builderData, builderExtraData);
 			}
 			
-			$item = itemBuilder( builderData );
+			$item = itemBuilder.call( self, builderData );
 			
 			if( $item && typeof $item === "string" ) {
 				$item = SGUtils.cre( $item );
@@ -2551,7 +2556,7 @@ function Suggest( inputOptions ) {
 	function getResult( index ) {
 		index = getIndex( index );
 		var itemData = getItemData( index );
-		return itemData != null ? options.result( itemData, index, viewData, viewValue ) : null;
+		return itemData != null ? options.result.call( self, itemData, index, viewData, viewValue ) : null;
 	}
 	
 	
@@ -2604,8 +2609,7 @@ function Suggest( inputOptions ) {
 		
 		var	data = getData(),
 			itemData = getItemData( index ),
-			select = options.select,
-			unselect = options.unselect,
+			select_handler = options.select,
 			retSelect,
 			lazySelectEnd = false;
 		
@@ -2617,8 +2621,8 @@ function Suggest( inputOptions ) {
 		// Возвращаем изначальный запрос, если вдруг он был изменен предварительный просмотром запроса.
 		revertResult();
 		
-		if( isFunction( select ) ) {
-			retSelect = select( getState() );
+		if( isFunction( select_handler ) ) {
+			retSelect = select_handler.call( self, getState() );
 		}
 		
 		if( retSelect !== false ) {
@@ -2692,9 +2696,9 @@ function Suggest( inputOptions ) {
 	 * 
 	 */
 	function selectEnd() {
-		var unselect = options.unselect;
-		if( isFunction( unselect ) ) {
-			unselect( getState() );
+		var unselect_handler = options.unselect;
+		if( isFunction( unselect_handler ) ) {
+			unselect_handler.call( self, getState() );
 		}
 		
 		// Сигнализиуем о выборе определенного саджеста
@@ -2735,7 +2739,7 @@ function Suggest( inputOptions ) {
 			if( typeof switcher === "string" ) {
 				ret = !SGUtils.hasCls( $container, options.switcher );
 			} else if( isFunction( switcher ) && isFunction( switchChecker ) ) {
-				ret = !switchChecker();
+				ret = !switchChecker.call( self );
 			}
 		} else {
 			ret = SGUtils.css( $container, "display" ) === "none";
@@ -2759,7 +2763,7 @@ function Suggest( inputOptions ) {
 			} else if( typeof switcher === "string" ) {
 				SGUtils.addCls( $container, switcher );
 			} else if( isFunction( switcher ) ) {
-				switcher( true, $container );
+				switcher.call( self, true, $container );
 			}
 			
 			if( options.correction ) {
@@ -3072,10 +3076,14 @@ function Suggest( inputOptions ) {
 	
 	// External interface
 	extend( this, {
+		// nodes
+		field: $field,
+		form: $form,
+		cont: $container,
+		list: $list, 
+		
+		// methods
 		show: show,
-		/*get: function( value, fn ) {
-			typeof value === "string" && isFunction( fn ) && handleValue( value, fn );
-		},*/
 		focus: focus,
 		moveFocus: moveFocus,
 		select: select,
@@ -3092,7 +3100,11 @@ function Suggest( inputOptions ) {
 		opts: opts,
 		flushCache: function() {
 			cache.flush();
-		}
+		},
+		
+		/*get: function( value, fn ) {
+			typeof value === "string" && isFunction( fn ) && handleValue( value, fn );
+		},*/
 	});
 	
 	self.guid = getGUID();
@@ -3150,12 +3162,12 @@ Suggest.opts = {
 		return data && data.items ? data.items : [];
 	},
 	cch: true,
-	// TODO cchLifeTime: 36 * 1E6,
 	cchLimit: 128,
 	max: 5,
 	min: 0,
 	autoSubmit: true,
 	hover: "sg-item-hover",
+	// itemExtraData: {"foo": "bar"},
 	item: '<div class="sg-item"><%= itemData.textMarked || itemData.text %></div>',
 	result: function( itemData ) {
 		return itemData.text;
@@ -3167,16 +3179,6 @@ Suggest.opts = {
 	preview: true,
 	debug: false
 };
-
-// detect dataURI support 
-SGUtils.suppDataURI = false;
-var tmp_img = new Image;
-Evt.add(tmp_img, "load error", function( event ) {
-	Evt.rm(tmp_img, "load error");
-	SGUtils.suppDataURI = event.type === "load";
-	tmp_img = null;
-});
-tmp_img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
 
 // Расшариваем утилиты. Мало ли кому понадобятся =)
 Suggest.utils = SGUtils;
