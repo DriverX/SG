@@ -3289,6 +3289,9 @@ Ajax.defaults = {
 	}
 };
 
+// Share
+sg.Ajax = Ajax;
+
 })( window, SG );
 
 /*
