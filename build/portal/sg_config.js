@@ -13,9 +13,10 @@ tmp_img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAA
 
 
 sg.SHOW_MUSICON = false;
-	
-// merge default options with go.mail.ru options
-sg.utils.ext(true, sg.opts, {
+
+
+var navSuggSelected = null;
+var options = {
 	enabled : false,
 	field : null,
 	cont : ".go-suggests",
@@ -66,34 +67,8 @@ sg.utils.ext(true, sg.opts, {
 		var itemData = data.itemData, result = data.result, value = data.value, srchForm = this.form;
 
 		if (itemData.type === 'site') {
-			// create temporary form node for redirect
-			var redirForm = SG.utils.cre("form");
-			redirForm.action = "//go.mail.ru/search";
-			redirForm.method = "get";
-			redirForm.target = "_blank";
-			var	params = {
-					q: itemData.link,
-					sg: data.value,
-					sgsig: itemData.sig,
-					ce: 1
-				};
-			SG.utils.objEach(params, function(v, k) {
-				var input = SG.utils.cre("input");
-				input.type = "hidden";
-				input.name = k;
-				input.value = v;
-				redirForm.appendChild(input);
-			});
-			
-			document.body.appendChild(redirForm);
-			redirForm.submit();
-			
-			// remove temporary form 
-			setTimeout(function() {
-				SG.utils.rme(redirForm);
-				redirForm = null;
-			}, 50);
-			return false;
+			navSuggSelected = data;
+			return;
 		}
 
 		var moreData = {
@@ -108,15 +83,15 @@ sg.utils.ext(true, sg.opts, {
 		if (isMusSugg) {
 			moreData.usmus = 1;
 			moreData.rch = "l";
-			SG.utils.rme(srchForm.elements.rch);
+			sg.utils.rme(srchForm.elements.rch);
 		}
 
 		var inputs = [];
-		SG.utils.objEach(moreData, function(v, k) {
+		sg.utils.objEach(moreData, function(v, k) {
 			if (value == null) {
 				return;
 			}
-			var input = SG.utils.cre("input");
+			var input = sg.utils.cre("input");
 			input.type = "hidden";
 			input.name = k;
 			input.value = v;
@@ -128,11 +103,69 @@ sg.utils.ext(true, sg.opts, {
 		});
 
 		setTimeout(function() {
-			SG.utils.arrEach(inputs, function(n) {
-				SG.utils.rme(n);
+			sg.utils.arrEach(inputs, function(n) {
+				sg.utils.rme(n);
 			})
 		}, 10);
+	},
+	unselect: function() {
+		navSuggSelected = null;
 	}
-});
+};
+
+
+function onFormSubmit( event ) {
+	if( !navSuggSelected ) {
+		return
+	}
+	
+	var itemData = navSuggSelected.itemData,
+		value = navSuggSelected.value;
+	
+	// create temporary form node for redirect
+	var redirForm = sg.utils.cre("form");
+	redirForm.action = "//go.mail.ru/search";
+	redirForm.method = "get";
+	redirForm.target = "_blank";
+	var	params = {
+			q: itemData.link,
+			sg: value,
+			sgsig: itemData.sig,
+			ce: 1
+		};
+	sg.utils.objEach( params, function( v, k ) {
+		var input = sg.utils.cre("input");
+		input.type = "hidden";
+		input.name = k;
+		input.value = v;
+		redirForm.appendChild( input );
+		input = null;
+	});
+	
+	document.body.appendChild( redirForm );
+	redirForm.submit();
+	
+	// remove temporary form 
+	setTimeout(function() {
+		sg.utils.rme( redirForm );
+		redirForm = null;
+	}, 15);
+	
+	event.preventDefault();
+}
+
+function onEnable( event ) {
+	sg.utils.Event.add( this.form, "submit", onFormSubmit );
+}
+
+function onDisable( event ) {
+	sg.utils.Event.rm( this.form, "submit", onFormSubmit );
+}
+
+options.onEnable = onEnable;
+options.onDisable = onDisable;
+
+// merge default options with go.mail.ru options
+sg.utils.ext( true, sg.opts, options );
 
 })(SG);

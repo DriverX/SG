@@ -3034,7 +3034,7 @@ function Suggest( inputOptions ) {
 	
 	
 	
-	var options = SGUtils.copy( Suggest.opts );
+	var options = {};
 	
 	function prepareOptions( options ) {
 		if( options == null ) {
@@ -3098,6 +3098,7 @@ function Suggest( inputOptions ) {
 	}
 	
 	// Применяем переданные настройки
+	inputOptions = extend( true, {}, Suggest.opts, inputOptions );
 	opts( inputOptions );
 	
 	
@@ -3183,11 +3184,7 @@ function Suggest( inputOptions ) {
 		opts: opts,
 		flushCache: function() {
 			cache.flush();
-		},
-		
-		/*get: function( value, fn ) {
-			typeof value === "string" && isFunction( fn ) && handleValue( value, fn );
-		},*/
+		}
 	});
 	
 	self.guid = getGUID();
