@@ -276,9 +276,10 @@ that must be nulled. Need this only to generic case
 window.yassmod = _;
 
 })( window, document );
-(function( window, document, yass, undefined ) {
+(function( window, yass, undefined ) {
 	
 var	
+	document = window.document,
 	isOpera = /opera/i.test( navigator.userAgent ) && !!window.opera,
 	
 	// Props name
@@ -389,8 +390,8 @@ var SGUtils = {
 	},
 	
 	bind: function( fn, obj ) {
-		var args = Array__slice.call(arguments, 1),
-			bound = function() {
+		var args = Array__slice.call( arguments, 2 ),
+			bound = function() {				
 				return fn.apply(this instanceof emptyFn ? this : (obj || {}), args.concat(Array__slice.call(arguments)));
 			};
 		emptyFn.prototype = fn.prototype;
@@ -974,10 +975,62 @@ var SGUtils = {
 		return a !== b && ( a.contains ? a.contains( b ) : true );
 	} : document.documentElement.compareDocumentPosition ? function( a, b ) {
 		return !!( a.compareDocumentPosition(b) & 16 );
-	} : fnFALSE
+	} : fnFALSE,
+	
+	// from jQuery
+	// Cross-browser xml parsing
+	parseXML: function( data ) {
+		if ( typeof data !== "string" || !data ) {
+			return null;
+		}
+		var xml, tmp;
+		try {
+			if ( window.DOMParser ) { // Standard
+				tmp = new DOMParser();
+				xml = tmp.parseFromString( data , "text/xml" );
+			} else { // IE
+				xml = new ActiveXObject( "Microsoft.XMLDOM" );
+				xml.async = "false";
+				xml.loadXML( data );
+			}
+		} catch( e ) {
+			xml = undefined;
+		}
+		if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
+			throw ("Invalid XML: " + data);
+		}
+		return xml;
+	}
 };
 
+// from jQuery
+// JSON RegExp
+var	rvalidchars = /^[\],:{}\s]*$/,
+	rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+	rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+	rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g;
+SGUtils.parseJSON = function( data ) {
+	if( typeof data !== "string" || !data ) {
+		return null;
+	}
 
+	data = SGUtils.trim( data );
+
+	if( window.JSON && window.JSON.parse ) {
+		return window.JSON.parse( data );
+	}
+
+	// Make sure the incoming data is actual JSON
+	// Logic borrowed from http://json.org/json2.js
+	if( rvalidchars.test( data.replace( rvalidescape, "@" )
+		.replace( rvalidtokens, "]" )
+		.replace( rvalidbraces, "")) ) {
+		return ( new Function( "return " + data ) )();
+	}
+	throw ( "Invalid JSON: " + data );
+};
+
+	
 /**
  * Template Engine
  * based from Simple JavaScript Templating via John Resig - http://ejohn.org/
@@ -1889,7 +1942,13 @@ function Suggest( inputOptions ) {
 					return false;
 				}
 				
-				var	self = this;
+				var	self = this,
+					transport,
+					transportOptions = {},
+					url = options.url,
+					replacement = {
+						"query": value
+					};
 				
 				if( options.cch && cache.has( value ) ) {
 					onSuccess && onSuccess( cache.get( value ), value );
@@ -1901,10 +1960,6 @@ function Suggest( inputOptions ) {
 					return false;
 				}
 				
-				var url = options.url,
-					replacement = {
-						"query": value
-					};
 				
 				if( typeof url === "object" ) {
 					url = SGUtils.url( SGUtils.objFormat( url, replacement ) );
@@ -1913,66 +1968,87 @@ function Suggest( inputOptions ) {
 					url = SGUtils.format( url, replacement );
 				}
 				
+				// options for transport
+				var migrationOptions = {
+					dataType: options.reqDataType,
+					timeout: options.reqTimeout,
+					jsonp: options.callbackParam,
+					scriptCharset: options.scriptCharset,
+					data: options.reqData
+				};
 				
-				var transport = jsonp({
-						timeout: options.reqTimeout,
-						callbackParam: options.callbackParam,
-						scriptCharset: options.scriptCharset,
-						data: options.reqData,
-						success: function( response ) {
-							// Возбуждаем событие получения данных
-							fireEvent( SuggestEvents.successRequest, [ response, value ] );
-							
-							// Возбуждаем событие завершения запроса
-							fireEvent( SuggestEvents.completeRequest, [ response, value ] );
-							
-							var dataFilter = options.dataFilter;
-							if( isFunction( dataFilter ) ) {
-								response = dataFilter.call( self, response, value );
-							}
-							
-							// Удаляем объект запроса из стека
-							if( !self.rm( transport ) ) {
-								fireEvent( SuggestEvents.stopRequest, [ value ] );
-							}
-							
-							if( options.cch ) {
-								// Пишем в кэш ответ от сервера
-								cache.set( value, response );
-							}
-							
-							// Вызываем callback
-							onSuccess && onSuccess( response, value );
-						},
-						error: function( reason ) {
-							// Возбуждаем событие получения данных
-							fireEvent( SuggestEvents.errorRequest, [ reason, value ] );
-							
-							// Возбуждаем событие завершения запроса
-							fireEvent( SuggestEvents.completeRequest, [ reason, value ] );
-							
-							// Удаляем объект запроса из стека
-							if( !self.rm( transport ) ) {
-								fireEvent( SuggestEvents.stopRequest, [ value ] );
-							}
-							
-							// Вызываем errback
-							onError && onError( reason, value );
-						} 
-					});
+				// make options
+				for( var k in migrationOptions ) {
+					if( migrationOptions[ k ] != null ) {
+						transportOptions[ k ] = migrationOptions[ k ];
+					}
+				}
+				
+				// new options format
+				if( options.ajax ) {
+					extend( true, transportOptions, options.ajax );
+				}
+				
+				// create transport
+				transport = Suggest.Ajax( url, transportOptions );
+				
+				transport.on("success", function( event, response ) {
+					// Возбуждаем событие получения данных
+					fireEvent( SuggestEvents.successRequest, [ response, value ] );
+					
+					// Возбуждаем событие завершения запроса
+					fireEvent( SuggestEvents.completeRequest, [ response, value ] );
+					
+					var dataFilter = options.dataFilter;
+					if( isFunction( dataFilter ) ) {
+						response = dataFilter.call( self, response, value );
+					}
+					
+					// Удаляем объект запроса из стека
+					if( !self.rm( transport ) ) {
+						fireEvent( SuggestEvents.stopRequest, [ value ] );
+					}
+					
+					if( options.cch ) {
+						// Пишем в кэш ответ от сервера
+						cache.set( value, response );
+					}
+					
+					// Вызываем callback
+					if( onSuccess ) {
+						onSuccess( response, value );
+					}
+				});
+				transport.on("error", function( event, status, statusText ) {
+					var reason = statusText;
+					
+					// Возбуждаем событие получения данных
+					fireEvent( SuggestEvents.errorRequest, [ reason, value ] );
+					
+					// Возбуждаем событие завершения запроса
+					fireEvent( SuggestEvents.completeRequest, [ reason, value ] );
+					
+					// Удаляем объект запроса из стека
+					if( !self.rm( transport ) ) {
+						fireEvent( SuggestEvents.stopRequest, [ value ] );
+					}
+					
+					// Вызываем errback
+					if( onError ) {
+						onError( reason, value );
+					}
+				});
 				
 				// Добавляем запрос в стек
 				if( self.add( transport, value ) == 1 ) {
 					fireEvent( SuggestEvents.startRequest, [ value ] );
 				}
 				
-				
 				// Возбуждаем событие отправки данных
 				fireEvent( SuggestEvents.sendRequest, [ value ] );
 				
-				
 				// Отправляем
-				transport.send( url );
+				transport.send();
 
 				return true;
 			}
@@ -3202,19 +3278,64 @@ Suggest.utils = SGUtils;
 window.SG = window.SG || Suggest;
 
 
-})( window, document, window.yassmod );
+})( window, window.yassmod );
 
 ;(function( window, sg ){
 	
 var document = window.document,
 	utils = sg.utils,
-	Event = sg.Event;
+	Event = utils.Event;
+	
+// from jQuery
+var rurl = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/,
+	rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
+	ajaxLocation,
+	ajaxLocParts;
+try {
+	ajaxLocation = location.href;
+} catch( e ) {
+	ajaxLocation = document.createElement( "a" );
+	ajaxLocation.href = "";
+	ajaxLocation = ajaxLocation.href;
+}
+
+// Segment location into parts
+ajaxLocParts = rurl.exec( ajaxLocation.toLowerCase() ) || [];
+
+function getSimpleXHR() {
+	try {
+		return new XMLHttpRequest();
+	} catch(e) {}
+	try {
+		return new ActiveXObject( "Microsoft.XMLHTTP" );
+	} catch(e) {}
+}
+
+var xhr = getSimpleXHR(),
+	supportCORS = false,
+	supportXDR = typeof XDomainRequest !== "undefined";
+if( "withCredentials" in xhr || supportXDR ) {
+    supportCORS = true;
+    xhr = null;
+}
+
 
 function Ajax( url, options ) {
-	var klass;
+	var klass,
+		urlParts;
 	
 	options = utils.ext(true, {}, Ajax.defaults, options);
 	options.method = options.method.toUpperCase();
+	
+	// port from jQuery
+	if( options.crossDomain == null ) {
+		urlParts = rurl.exec( url.toLowerCase() );
+		options.crossDomain = !!( urlParts &&
+			( urlParts[ 1 ] != ajaxLocParts[ 1 ] || urlParts[ 2 ] != ajaxLocParts[ 2 ] ||
+				( urlParts[ 3 ] || ( urlParts[ 1 ] === "http:" ? 80 : 443 ) ) !=
+					( ajaxLocParts[ 3 ] || ( ajaxLocParts[ 1 ] === "http:" ? 80 : 443 ) ) )
+		);
+	}
 	
 	if( !options.dataType ) {
 		throw Error("dataType must be specified");	
@@ -3234,15 +3355,15 @@ function BaseAjax( url, options ) {
 	var self = this,
 		options_callbacks = ["success", "complete", "error"],
 		i, l, cb;
-	
-	self._url = url;
+		
+	self._url = url.replace(/#.*$/, "");
 	self._options = options;
 	
 	// init callbacks bindings
 	for( l = options_callbacks.length; l--; ) {
 		cb = options[options_callbacks[l]];
-		if( cb && utils.isFn(cb) ) {
-			self.on(options_callbacks[l], cb);
+		if( cb && utils.isFn( cb ) ) {
+			self.on( options_callbacks[l], cb );
 		}
 	}
 }
@@ -3299,26 +3420,126 @@ function XHR( url, options ) {
 	self._processing = false;
 	self._completed = false;
 	self._aborted = false;
+	self._tmid = null;
+	self._setReqHeaders = {};
 }
 
 XHR.prototype = utils.ext({}, BaseAjax.prototype, {
+	_dataTypes: {
+		json: utils.parseJSON,
+		xml: utils.parseXML
+	},
 	_getXHR: function() {
-		try {
-			return new XMLHttpRequest();
-		} catch(e) {}
-		try {
-			return new ActiveXObject( "Microsoft.XMLHTTP" );
-		} catch(e) {}
+		var self = this;
+		if( self._options.crossDomain ) {
+			if( supportCORS ) {
+				if( supportXDR ) {	
+					return new XDomainRequest();
+				}
+				return getSimpleXHR();
+			}
+		} else {
+			return getSimpleXHR();
+		}
 		return null;
 	},
-	_abort: function( code ) {
+	_handleResponse: function() {
+		var self = this,
+			options = self._options,
+			dataType = options.dataType,
+			response = self.responseText,
+			data,
+			convertor;
+			
+		convertor = self._dataTypes[ dataType ];
+		if( convertor ) {
+			data = convertor( response );
+		} else {
+			data = String( response );
+		}
+		return data;
+	},
+	_onreadystatechange: function() {
+		var self = this,
+			xhr = self._xhr,
+			aborted = self._aborted,
+			status,
+			AjaxStatus,
+			AjaxTextStatus,
+			response = null,
+			xml;
 		
+		if( !aborted ) {
+			self.readyState = xhr.readyState;
+			self.status = xhr.status;
+			try {
+				self.statusText = xhr.statusText;
+			} catch(e) {
+				self.statusText = "";
+			}
+			
+			if( self.readyState == 4 ) {
+				xml = xhr.responseXML;
+				if ( xml && xml.documentElement ) {
+					self.responseXML = xml;
+				}
+				try {
+					self.responseText = xhr.responseText;
+				} catch(e) {}
+			}
+		}
+			
+		if( aborted || self.readyState == 4 ) {
+			xhr.onreadystatechange = null;
+			
+			clearTimeout( self._tmid );
+			
+			if( !aborted ) {
+				status = self.status;
+				
+				self._processing = false;
+				self._completed = true;
+				
+				if( status >= 200 && status < 300 || status === 304 ) {
+					response = self._handleResponse();
+					AjaxStatus = Ajax.SUCCESS;
+					AjaxTextStatus = STATUSES[ AjaxStatus ];
+					self.fire("success", [ response, AjaxTextStatus ] );
+				} else {
+					AjaxStatus = Ajax.BAD_STATUS;
+					AjaxTextStatus = STATUSES[ AjaxStatus ];
+					self.fire("error", [ AjaxStatus, AjaxTextStatus ] );
+				}
+				
+				self.fire("complete", [ response, AjaxStatus, AjaxTextStatus ] );
+				self._cleanup();
+			}
+		}
+	},
+	_abort: function( status ) {
+		var self = this,
+			xhr = self._xhr,
+			textStatus = STATUSES[ status ];
+			
+		self._aborted = true;
+		self._processing = false;
+		self._completed = true;
+		self._onreadystatechange();
+		
+		self.readyState = 4;
+		
+		self.fire("error", [ status, textStatus ] );
+		self.fire("complete", [ null, status, textStatus ] );
+		
+		self._cleanup();
 	},
 	_cleanup: function() {
 		self._xhr = null;
 		self._processing = false;
 		self._completed = false;
 		self._aborted = false;
+		self._tmid = null;
+		self._setReqHeaders = {};
 	},
 	
 	send: function() {
@@ -3328,75 +3549,80 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 		}
 		
 		var options = self._options,
-			xhr;
+			xhr,
+			method,
+			url,
+			urlQSStart,
+			urlArgs = "";
 			
 		xhr = self._getXHR();
 		if( !xhr ) {
-			return;
+			throw Error("not supported");
 		}
 		
-		/*
-		function ajax( url, options ) {
-			options = options || {};
-			
-			var xhr;
-			try {
-				xhr = new window.XMLHttpRequest();
-			} catch(e) {
-				try {
-					xhr = new window.ActiveXObject( "Microsoft.XMLHTTP" );
-				} catch( e ) {}
-			}
-			
-			if( xhr ) {
-				var	method = options.method && options.method.toLowerCase() || "get",
-					success = options.success,
-					error = options.error,
-					timeout = options.timeout,
-					timerId,
-					args = "";
-				
-				if( method === "post" ) {
-					var qsStart = url.indexOf( "?" );
-					if( ~qsStart ) {
-						args = url.slice( qsStart + 1 );
-						url = url.substring( 0, qsStart );
-					}
-				}
-				
-				xhr.onreadystatechange = function() {
-					if( xhr.readyState == 4 ) {
-						xhr.onreadystatechange = null;
-						clearTimeout( timerId );
-						
-						if( xhr.status == 200 ) {
-							success && success( xhr.responseText );
-						} else {
-							error && error( "status", xhr.status );
-						}
-					}
-				};
-				
-				
-				if( timeout ) {
-					timerId = setTimeout(function() {
-						xhr.abort();
-					}, timeout );
-				}
-				
-				
-				xhr.open( method, url, true );
-				if( method === "post" ) {
-					xhr.setRequestHeader( "Content-Type", "application/x-www-form-urlencoded" );
-				}
-				xhr.setRequestHeader( "If-Modified-Since", "Sat, 1 Jan 1970 00:00:00 GMT" );
-				xhr.send( method === "post" ? args : null );
+		self._xhr = xhr;
+		
+		method = options.method;
+		
+		url = self._url;
+		if( method === "POST" ) {
+			urlQSStart = url.indexOf("?");
+			if( ~urlQSStart ) {
+				urlArgs = url.slice( urlQSStart + 1 );
+				url = url.substring( 0, urlQSStart );
 			}
 		}
-		*/		
+		
+		// open socket
+		xhr.open( method, url, !!options.async );
+		
+		// general callback
+		xhr.onreadystatechange = utils.bind( self._onreadystatechange, self );
+		
+		if( method === "POST" ) {
+			self.setRequestHeader("Content-Type", options.contentType );
+		}
+		if( !options.cache ) {
+			self.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 1970 00:00:00 GMT");
+		}
+		
+		if ( !options.crossDomain && !self._setReqHeaders["X-Requested-With"] ) {
+			self._setReqHeaders["X-Requested-With"] = "XMLHttpRequest";
+		}
+		
+		utils.objEach( self._setReqHeaders, function( v, k ) {
+			xhr.setRequestHeader( k, v );
+		});
+		
+		// set additionals xhr props
+		if ( options.xhrFields ) {
+			utils.objEach( options.xhrFields, function( v, k ) {
+				xhr[ k ] = v;
+			});
+		}
+		
+		// mark as processing
+		self._processing = true;
+		
+		// set timeout
+		if( options.timeout ) {
+			self._tmid = setTimeout(function() {
+				self._abort( Ajax.ABORT_TIMEOUT );
+			}, options.timeout );
+		}
+		
+		// make request
+		xhr.send( method === "POST" ? urlArgs : null );		
 	},
 	abort: function() {
-		
+		var self = this;
+		if( !self._completed ) {
+			self._abort( Ajax.ABORT_USER );
+		}
+	},
+	setRequestHeader: function( name, value ) {
+		var self = this;
+		self._setReqHeaders[ name ] = value;
 	}
 });
 
@@ -3423,6 +3649,7 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 			
 			utils.rme(node);
 			node = null;
+			self._script = null;
 			
 			self._complete();
 			
@@ -3432,12 +3659,14 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		}
 	},
 	_glCb: function( response ) {
-		var self = this;
-		self._complete()
+		var self = this,
+			status = Ajax.SUCCESS,
+			textStatus = STATUSES[ status ];
+		self._complete();
 		self._rmGlCb();
 		
-		self.fire("success", response );
-		self.fire("complete", [response, Ajax.SUCCESS] );
+		self.fire("success", [ response, textStatus ] );
+		self.fire("complete", [ response, status, textStatus ] );
 		
 		self._cleanup();
 	},
@@ -3450,30 +3679,31 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 	},
 	_addGlCb: function() {
 		var self = this;
-		window[self._jsonpCallback] = utils.bind( self._glCb, self );
+		window[ self._jsonpCallback ] = utils.bind( self._glCb, self );
 	},
 	_rmGlCb: function() {
 		try {
-			delete window[this._jsonpCallback];
+			delete window[ this._jsonpCallback ];
 		} catch( e ) {}
 	},
 	_replGlCb2Rm: function() {
 		var self = this;
-		window[self._jsonpCallback] = utils.bind( self._rmGlCb, self );
+		window[ self._jsonpCallback ] = utils.bind( self._rmGlCb, self );
 	},
-	_abort: function( code ) {
-		var self = this;
+	_abort: function( status ) {
+		var self = this,
+			statusText = STATUSES[ status ];
 		self._aborted = true;
 		self._onload();
 		
-		self.fire("error", code);
-		self.fire("complete", [null, code]);
+		self.fire("error", [ status, statusText ]);
+		self.fire("complete", [ null, status, statusText ] );
 		
 		self._cleanup();
 	},
 	_cleanup: function() {
 		var self = this;
-		self._script = null;
+		// self._script = null;
 		// do not clean, because global callback may execute
 		// self._jsonpCallback = null;
 		self._processing = false;
@@ -3503,15 +3733,15 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		}
 		
 		if( options.data ) {
-			extraData = utils.ext(extraData, options.data);
+			extraData = utils.ext( extraData, options.data );
 		}
-		extraData[jsonp] = jsonpCallback;
+		extraData[ jsonpParam ] = jsonpCallback;
+		
 		if( !options.cache ) {
 			extraData["_"] = sg.now();
 		}
 		
-		// remove fragment
-		url = self._url.replace(/#.*$/, "");
+		url = self._url;
 		// build url
 		url = utils.aprm( url, extraData );
 		
@@ -3531,6 +3761,9 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		self._jsonpCallback = jsonpCallback;
 		self._processing = true;
 		
+		// add general handler
+		self._addGlCb();
+		
 		if( options.timeout ) {
 			self._tmid = setTimeout(function() {
 				self._abort( Ajax.ABORT_TIMEOUT );
@@ -3549,22 +3782,16 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 });
 
 
-// from jQuery
-var ajaxLocation;
-try {
-	ajaxLocation = location.href;
-} catch( e ) {
-	ajaxLocation = document.createElement( "a" );
-	ajaxLocation.href = "";
-	ajaxLocation = ajaxLocation.href;
-}
-
 // default options
 Ajax.defaults = {
-	type: "get",
+	dataType: "text",
+	method: "GET",
 	url: ajaxLocation,
 	async: true,
 	contentType: "application/x-www-form-urlencoded; charset=utf-8",
+	xhrFields: {
+		withCredentials: false
+	},
 	jsonp: "callback",
 	jsonpCallback: function() {
 		return sg.expando + "_" + sg.guid(); 
@@ -3573,10 +3800,21 @@ Ajax.defaults = {
 };
 
 // statuses
-var stid = 1;
-Ajax.ABORT_USER = stid++;
-Ajax.ABORT_TIMEOUT = stid++;
-Ajax.SUCCESS = stid++;
+var stid = 1,
+	cds = {},
+	STATUSES = {};
+function addStatus( name, code, text ) {
+	name = name.toUpperCase();
+	Ajax[ name ] = code;
+	STATUSES[ code ] = text;
+}
+addStatus("ABORT_USER", stid++, "aborted" );
+addStatus("ABORT_TIMEOUT", stid++, "timeout" );
+addStatus("BAD_STATUS", stid++, "bad status" );
+addStatus("SUCCESS", stid++, "OK" );
+Ajax.STATUSES = {};
+
+
 
 
 // Share

@@ -34,6 +34,7 @@ sg.utils.ext(true, sg.opts, {
 		}
 	},
 	reqTimeout : 3000,
+	reqDataType: "jsonp",
 	reqData : {},
 	dataFilter : function(data) {
 		if (data) {
@@ -55,8 +56,6 @@ sg.utils.ext(true, sg.opts, {
 				}
 			}
 		}
-		
-		console.log(data);
 		return data;
 	},
 	item: ".go-suggests__suggest-tmpl",
