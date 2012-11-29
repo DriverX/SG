@@ -19,16 +19,12 @@
 	</form>
 
 	<!-- main suggests container -->
-	<ul id="sg-items" style="display: none;"></ul>
+	<div id="sg" style="display: none;"></div>
 
 	<script>
 		var suggests = SG({
 			// field, which will be inserted ыгппуыешщт
-			field : "#query-input",
-			// container for suggests
-			cont : "#sg-items",
-			// template per suggestion
-			item : "<li><%= itemData.textMarked %></li>"
+			field : "#query-input"
 		});
 	</script>
 </body>
