@@ -2,7 +2,6 @@
 Поисковые подсказоньки
 
 ## Простой пример
-html:
 ```html
 <!doctype html>
 <html>
@@ -22,20 +21,18 @@ html:
  <!-- main suggests container -->
  <ul id="sg-items" style="display: none;"></ul>
  
+ <script>
+  var suggests = SG({
+   // field, which will be inserted ыгппуыешщт
+   field: "#query-input",
+   // container for suggests
+   cont: "#sg-items",
+   // template per suggestion
+   item: "<li><%= itemData.textMarked %></li>"
+  });
+ </script>
 </body>
 </html>
-```
-
-javascript:
-```javascript
-var suggests = SG({
- // field, which will be inserted ыгппуыешщт
- field: "#query-input",
- // container for suggests
- cont: "#sg-items",
- // template per suggestion
- item: "<li><%= itemData.textMarked %></li>"
-});
 ```
 
 All done!
