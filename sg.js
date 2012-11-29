@@ -3223,7 +3223,7 @@ Suggest.opts = {
 	// correction: true,
 	// shiftX: 0,
 	// shiftY: 0,
-	switcher: "sg-open",
+	// switcher: "sg-open",
 	// switchChecker: function( container ) {},
 	delay: 250,
 	valMin: 1,
@@ -3233,6 +3233,7 @@ Suggest.opts = {
 	callbackParam: "callback",
 	reqTimeout: 5000,
 	reqMax: 2,
+	reqDataType: "jsonp",
 	// reqData: {},
 	scriptCharset: "utf-8",
 	dataFilter: function( data ) {
