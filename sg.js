@@ -3778,6 +3778,10 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 	}
 });
 
+// На всякий
+Ajax.XHR = XHR;
+Ajax.JSONP = JSONP;
+
 
 // default options
 Ajax.defaults = {
