@@ -1,12 +1,15 @@
 (function( sg ) {
 
+var utils = sg.utils,
+	Event = utils.Event;
+	
 // detect dataURI support 
-sg.utils.suppDataURI = false;
+utils.suppDataURI = false;
 
 var tmp_img = new Image;
-sg.utils.Event.add(tmp_img, "load error", function( event ) {
-	sg.utils.Event.rm(tmp_img, "load error");
-	sg.utils.suppDataURI = event.type === "load";
+Event.add(tmp_img, "load error", function( event ) {
+	Event.rm(tmp_img, "load error");
+	utils.suppDataURI = event.type === "load";
 	tmp_img = null;
 });
 tmp_img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
@@ -83,15 +86,15 @@ var options = {
 		if (isMusSugg) {
 			moreData.usmus = 1;
 			moreData.rch = "l";
-			sg.utils.rme(srchForm.elements.rch);
+			utils.rme(srchForm.elements.rch);
 		}
 
 		var inputs = [];
-		sg.utils.objEach(moreData, function(v, k) {
+		utils.objEach(moreData, function(v, k) {
 			if (value == null) {
 				return;
 			}
-			var input = sg.utils.cre("input");
+			var input = utils.cre("input");
 			input.type = "hidden";
 			input.name = k;
 			input.value = v;
@@ -103,8 +106,8 @@ var options = {
 		});
 
 		setTimeout(function() {
-			sg.utils.arrEach(inputs, function(n) {
-				sg.utils.rme(n);
+			utils.arrEach(inputs, function(n) {
+				utils.rme(n);
 			})
 		}, 10);
 	},
@@ -123,7 +126,7 @@ function onFormSubmit( event ) {
 		value = navSuggSelected.value;
 	
 	// create temporary form node for redirect
-	var redirForm = sg.utils.cre("form");
+	var redirForm = utils.cre("form");
 	redirForm.action = "//go.mail.ru/search";
 	redirForm.method = "get";
 	redirForm.target = "_blank";
@@ -133,8 +136,8 @@ function onFormSubmit( event ) {
 			sgsig: itemData.sig,
 			ce: 1
 		};
-	sg.utils.objEach( params, function( v, k ) {
-		var input = sg.utils.cre("input");
+	utils.objEach( params, function( v, k ) {
+		var input = utils.cre("input");
 		input.type = "hidden";
 		input.name = k;
 		input.value = v;
@@ -147,7 +150,7 @@ function onFormSubmit( event ) {
 	
 	// remove temporary form 
 	setTimeout(function() {
-		sg.utils.rme( redirForm );
+		utils.rme( redirForm );
 		redirForm = null;
 	}, 15);
 	
@@ -155,17 +158,17 @@ function onFormSubmit( event ) {
 }
 
 function onEnable( event ) {
-	sg.utils.Event.add( this.form, "submit", onFormSubmit );
+	Event.add( this.form, "submit", onFormSubmit );
 }
 
 function onDisable( event ) {
-	sg.utils.Event.rm( this.form, "submit", onFormSubmit );
+	Event.rm( this.form, "submit", onFormSubmit );
 }
 
 options.onEnable = onEnable;
 options.onDisable = onDisable;
 
 // merge default options with go.mail.ru options
-sg.utils.ext( true, sg.opts, options );
+utils.ext( true, sg.opts, options );
 
 })(SG);
