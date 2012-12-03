@@ -273,26 +273,16 @@ SG({
 ```
 
 #### ajax
-##### dataType
-String `text|html|xml|json|jsonp` тип получаемых данных. В зависимости от значенния может выбираться разный способ создания запроса. default: `"text"`
-##### method
-String `POST|GET` метод отправки запроса default: `"GET"`
-##### data
-Object параметры добавляемые запрашиваемуму url
-##### contentType
-String default: `"application/x-www-form-urlencoded; charset=utf-8"`
-##### xhrFields
-Object поля добавляемые в xhr объект при создании запроса. по умолчанию `withCredentials: false`
-##### jsonp
-String имя параметра в запросе для передачи имени колбэка при `jsonp` запросах. default: `"callback"`
-##### jsonpCallback
-String|Function имя колбэка. default: `function() {return "{EXPANDO}_{REQUEST_ID}"}`
-##### scriptCharset
-String кодировка в которую следует перевести ответ при `jsonp` запросах. default: `"utf-8"`
-##### timeout
-Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
-##### stackSize
-Integer максимальное одновременное кол-во запросов. default: `2`
+ * __dataType__ - String `text|html|xml|json|jsonp` тип получаемых данных. В зависимости от значенния может выбираться разный способ создания запроса. default: `"text"`
+ * __method__ - String `POST|GET` метод отправки запроса default: `"GET"`
+ * __data__ - Object параметры добавляемые запрашиваемуму url
+ * __contentType__ - String default: `"application/x-www-form-urlencoded; charset=utf-8"`
+ * __xhrFields__ - Object поля добавляемые в xhr объект при создании запроса. по умолчанию `withCredentials: false`
+ * __jsonp__ - String имя параметра в запросе для передачи имени колбэка при `jsonp` запросах. default: `"callback"`
+ * __jsonpCallback__ - String|Function имя колбэка. default: `function() {return "{EXPANDO}_{REQUEST_ID}"}`
+ * __scriptCharset__ - String кодировка в которую следует перевести ответ при `jsonp` запросах. default: `"utf-8"`
+ * __timeout__ - Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
+ * __stackSize__ - Integer максимальное одновременное кол-во запросов. default: `2`
 
 
 #### callbackParam
