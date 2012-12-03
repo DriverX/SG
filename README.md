@@ -226,32 +226,32 @@ __or__
 new SG( options );
 ```
 
-### Опции
-#### field
+## Опции
+### field
 Selector|DOMNode инпут, к которому следует привязать саджесты
-#### cont
+### cont
 Selector|DOMNode главный блок, который будет прятаться/показываться default: `"#sg, .sg"`
-#### list
+### list
 Selector|DOMNode блок, где будут рисоваться саджесты. Если не указан, то будет использоваться `cont`
-#### enabled
+### enabled
 Boolean указывает, будет ли включен саджест при создании экземпляра. Если `false`, то для включения нужно будет вызвать метод `instance.enable()`. default: `true`
-#### correction
+### correction
 Boolean Если `true`, то будет включена автокоррекция блока `cont` относительно `field`, причем корректироваться будет только в случае, если у блока указан стиль `position: absolute|relative|fixed`. default: `true`
-#### shiftX
+### shiftX
 Integer величина в пикселях, на которую следует скорректировать по горизонтали `cont` относительно 'field'. default: `0`
-#### shiftY
+### shiftY
 Integer величина в пикселях, на которую следует скорректировать по вертикали `cont` относительно 'field'. default: `0`
-#### switcher
+### switcher
 String класс, которые будет добавляться/удаляться, когда `cont` будет показан/убран. Если не указан, то у `cont` будет стираться и добавляться стиль 'display: none'  
-#### delay
+### delay
 Integer интервал, через которые будет проверяться `field` на наличие изменений в значении default: `250`
-#### valMin
+### valMin
 Integer минимальное кол-во символов для срабатывания саджестов default: `1`
-#### valMax
+### valMax
 Integer максимальное кол-во символов для срабатывания саджестов default: `255`
-#### valFilter
+### valFilter
 RegExp|Function фильтр, при положительном срабатывании которого будет срабатывать саджест default: `/(?:\S)/`
-#### url
+### url
 String|Object url, по которому будет запрашиваться саджест. default: `"http://suggests.go.mail.ru/sg_u?q={query}"`
 пример (обе записи идентичны):
 ```
@@ -272,7 +272,7 @@ SG({
 })
 ```
 
-#### ajax
+### ajax
  * __dataType__ - String `text|html|xml|json|jsonp` тип получаемых данных. В зависимости от значенния может выбираться разный способ создания запроса. default: `"text"`
  * __method__ - String `POST|GET` метод отправки запроса default: `"GET"`
  * __data__ - Object параметры добавляемые запрашиваемуму url
@@ -285,42 +285,42 @@ SG({
  * __stackSize__ - Integer максимальное одновременное кол-во запросов. default: `2`
 
 
-#### callbackParam
+### callbackParam
 deprecated, use `ajax.jsonp`
-#### reqTimeout
+### reqTimeout
 deprecated, use `ajax.timeout`
-#### reqMax
+### reqMax
 deprecated, use `ajax.stackSize`
-#### reqDataType
+### reqDataType
 deprecated, use `ajax.dataType`
-#### reqData
+### reqData
 deprecated, use `ajax.data` 
-#### scriptCharset
+### scriptCharset
 deprecated, use `ajax.scriptCharset`
-#### dataFilter
+### dataFilter
 Function фильтр данных пришедших по запросу 
-#### dataGet
+### dataGet
 Function функция извлекающая данные для элементов саджеста default: `function( data ){return data && data.items ? data.items : [];}`
-#### cch
+### cch
 Boolean Если `true`, то включает кэширование данных по конкретному запросу. default: `true`
-#### cchLimit
+### cchLimit
 Integer кол-во хранимых запросов-данных. default: `128`
-#### max
+### max
 Integer максимальное кол-во выводимых саджестов. default: `10`
-#### min
+### min
 Integer минимальное кол-во выводимых саджестов. default: `0`
-#### autoSubmit
+### autoSubmit
 Boolean Если `true`, то будет выполняться `submit()` формы сразу после выбора конкретного саджеста. default: `true`
-#### hover
+### hover
 String класс добавляемый элементу саджеста при выборе. default: `"sg__item_hover"`  
-#### item
+### item
 String|Function|DOMNode шаблон или фукнция для генерации html каждого конкретного саджеста. default: `<div class="sg__item"><%= itemData.textMarked %></div>'`
-#### result
+### result
 Function функция, которая извлекает запрос из данных каждого конкретного саджеста. default: `function( itemData ) {return itemData.text;}`
-#### select
+### select
 Function hook-функция, которая должна быть вызвана при выборе саджеста. С помощью этой опции можно предовратить выбор саджеста, достаточно вернуть `false` в функции. 
-#### keynavDelay
+### keynavDelay
 Integer задержка при выборе саджеста с клавиатуры. default: `150`
-#### preview
+### preview
 Boolean если `true`, то подставляет запрос выделенного саджеста в `field`. Работает только если выбирать саджест с клавиатуры. default: `true`
 
