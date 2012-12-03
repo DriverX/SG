@@ -246,6 +246,7 @@ SG({
     url: "http://suggests.go.mail.ru/sg_u?q={query}"
 })
 ```
+```
 SG({
     url: {
         scheme: 'http',
