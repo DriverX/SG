@@ -37,9 +37,11 @@ var options = {
 			q : '{query}'
 		}
 	},
-	reqTimeout : 3000,
-	reqDataType: "jsonp",
-	reqData : {},
+	ajax: {
+		dataType: "jsonp",
+		timeout : 3000,
+		data : {}
+	},
 	dataFilter : function(data) {
 		if (data) {
 			if (!data.items && data.sites && data.sites.length) {

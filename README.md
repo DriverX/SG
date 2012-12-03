@@ -258,25 +258,33 @@ SG({
     }
 })
 ```
- * __callbackParam__ - default: `"callback"`
- * __reqTimeout__ - default: `5000`
- * __reqMax__ - default: `2`
- * __reqDataType__ - default: `"jsonp"`
- * __reqData__ - default: 
- * __scriptCharset__ - default: `"utf-8"`
  * __ajax__ - 
- * __dataFilter__ - default: 
- * __dataGet__ - default: `function( data ){return data && data.items ? data.items : [];}`
- * __cch__ - default: `true`
- * __cchLimit__ - default: `128`
- * __max__ - default: `10`
- * __min__ - default: `0`
- * __autoSubmit__ - default: `true`
- * __hover__ - default: `"sg__item_hover"`
- * __itemExtraData__ - default:  
- * __item__ - default: `<div class="sg__item"><%= itemData.textMarked %></div>'`
- * __result__ - default: `function( itemData ) {return itemData.text;}`
- * __select__ - default: 
- * __keynavDelay__ - default: `150`
- * __preview__ - default: `true`
- * __debug__ - default: `false`
+   * __dataType__ - String `text|html|xml|json|jsonp` тип получаемых данных. В зависимости от значенния может выбираться разный способ создания запроса. default: `"text"`
+   * __method__ - String `POST|GET` метод отправки запроса default: `"GET"`
+   * __data__ - Object параметры добавляемые запрашиваемуму url
+   * __contentType__ - String default: `"application/x-www-form-urlencoded; charset=utf-8"`
+   * __xhrFields__ - Object поля добавляемые в xhr объект при создании запроса. по умолчанию `withCredentials: false`
+   * __jsonp__ - String имя параметра в запросе для передачи имени колбэка при `jsonp` запросах. default: `"callback"`
+   * __jsonpCallback__ - String|Function имя колбэка. default: `function() {return "{EXPANDO}_{REQUEST_ID}"}`
+   * __scriptCharset__ - String кодировка в которую следует перевести ответ при `jsonp` запросах. default: `"utf-8"`
+   * __timeout__ - Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
+   * __stackSize__ - Integer максимальное одновременное кол-во запросов. default: `2`
+ * __callbackParam__ - deprecated, use `ajax.jsonp`
+ * __reqTimeout__ - deprecated, use `ajax.timeout`
+ * __reqMax__ - deprecated, use `ajax.stackSize`
+ * __reqDataType__ - deprecated, use `ajax.dataType`
+ * __reqData__ - deprecated, use `ajax.data` 
+ * __scriptCharset__ - deprecated, use `ajax.scriptCharset`
+ * __dataFilter__ - Function фильтр данных пришедших по запросу 
+ * __dataGet__ - Function функция извлекающая данные для элементов саджеста default: `function( data ){return data && data.items ? data.items : [];}`
+ * __cch__ - Boolean Если `true`, то включает кэширование данных по конкретному запросу. default: `true`
+ * __cchLimit__ - Integer кол-во хранимых запросов-данных. default: `128`
+ * __max__ - Integer максимальное кол-во выводимых саджестов. default: `10`
+ * __min__ - Integer минимальное кол-во выводимых саджестов. default: `0`
+ * __autoSubmit__ - Boolean Если `true`, то будет выполняться `submit()` формы сразу после выбора конкретного саджеста. default: `true`
+ * __hover__ - String класс добавляемый элементу саджеста при выборе. default: `"sg__item_hover"`  
+ * __item__ - String|Function|DOMNode шаблон или фукнция для генерации html каждого конкретного саджеста. default: `<div class="sg__item"><%= itemData.textMarked %></div>'`
+ * __result__ - Function функция, которая извлекает запрос из данных каждого конкретного саджеста. default: `function( itemData ) {return itemData.text;}`
+ * __select__ - Function hook-функция, которая должна быть вызвана при выборе саджеста. С помощью этой опции можно предовратить выбор саджеста, достаточно вернуть `false` в функции. 
+ * __keynavDelay__ - Integer задержка при выборе саджеста с клавиатуры. default: `150`
+ * __preview__ - Boolean если `true`, то подставляет запрос выделенного саджеста в `field`. Работает только если выбирать саджест с клавиатуры. default: `true`
