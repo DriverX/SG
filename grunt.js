@@ -19,7 +19,7 @@ module.exports = function(grunt) {
 		},
 		concat : {
 			lib: {
-				src: ["lib/yass.mod.js", "lib/sg.js", "lib/sg.ajax.js"],
+				src: ["lib/yass.mod.js", "lib/sg.js", "lib/sg.event.js", "lib/sg.ajax.js"],
 				dest: "<%= files.name %>.js"
 			},
 			portal: {

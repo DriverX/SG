@@ -48,7 +48,7 @@ new SG( options );
 ```
 
 ### Опции
- * __field__ -
+ * __field__ - 
  * __cont__ - default: `"#sg, .sg"`
  * __list__ - 
  * __enabled__ - default: `true`
@@ -84,3 +84,18 @@ new SG( options );
  * __keynavDelay__ - default: `150`
  * __preview__ - default: `true`
  * __debug__ - default: `false`
+
+
+## Static properties
+ * __evt__ - содержит в себе все идентификаторы событий, на которые можно подписаться
+ * __utils__ - полезные утилиты 
+
+## Static methods
+
+
+## Instance properties
+
+
+## Instance methods
+
+

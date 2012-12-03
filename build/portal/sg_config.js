@@ -1,7 +1,7 @@
 (function( sg ) {
 
 var utils = sg.utils,
-	Event = utils.Event;
+	Event = sg.Event;
 	
 // detect dataURI support 
 utils.suppDataURI = false;
