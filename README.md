@@ -56,6 +56,12 @@ All done!
 ### setup
 устанавливает глобальные настройки саджестов
 
+### $
+alias `SG.utils.$`
+
+### $$
+alias `SG.utils.$$`
+
 
 ## Instance properties
  * __cont__ - DOMNode блока саджестов
