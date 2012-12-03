@@ -293,6 +293,8 @@ String кодировка в которую следует перевести о
 Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
 ##### stackSize
 Integer максимальное одновременное кол-во запросов. default: `2`
+
+
 #### callbackParam
 deprecated, use `ajax.jsonp`
 #### reqTimeout
