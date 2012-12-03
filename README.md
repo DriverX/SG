@@ -227,20 +227,36 @@ new SG( options );
 ```
 
 ### Опции
- * __field__ - 
- * __cont__ - default: `"#sg, .sg"`
- * __list__ - 
- * __enabled__ - default: `true`
- * __correction__ - default: `true`
- * __shiftX__ - default: `0`
- * __shiftY__ - default: `0`
- * __switcher__ - default: 
- * __switchChecker__ - default: 
- * __delay__ - default: `250`
- * __valMin__ - default: `1`
- * __valMax__ - default: `255`
- * __valFilter__ - default: `/(?:\S)/`
- * __url__ - default: `"http://suggests.go.mail.ru/sg_u?q={query}"`
+ * __field__ - Selector|DOMNode инпут, к которому следует привязать саджесты
+ * __cont__ - Selector|DOMNode главный блок, который будет прятаться/показываться default: `"#sg, .sg"`
+ * __list__ - Selector|DOMNode блок, где будут рисоваться саджесты. Если не указан, то будет использоваться `cont`
+ * __enabled__ - Boolean указывает, будет ли включен саджест при создании экземпляра. Если `false`, то для включения нужно будет вызвать метод `instance.enable()`. default: `true`
+ * __correction__ - Boolean Если `true`, то будет включена автокоррекция блока `cont` относительно `field`, причем корректироваться будет только в случае, если у блока указан стиль `position: absolute|relative|fixed`. default: `true`
+ * __shiftX__ - Integer величина в пикселях, на которую следует скорректировать по горизонтали `cont` относительно 'field'. default: `0`
+ * __shiftY__ - Integer величина в пикселях, на которую следует скорректировать по вертикали `cont` относительно 'field'. default: `0`
+ * __switcher__ - String класс, которые будет добавляться/удаляться, когда `cont` будет показан/убран. Если не указан, то у `cont` будет стираться и добавляться стиль 'display: none'  
+ * __delay__ - Integer интервал, через которые будет проверяться `field` на наличие изменений в значении default: `250`
+ * __valMin__ - Integer минимальное кол-во символов для срабатывания саджестов default: `1`
+ * __valMax__ - Integer максимальное кол-во символов для срабатывания саджестов default: `255`
+ * __valFilter__ - RegExp|Function фильтр, при положительном срабатывании которого будет срабатывать саджест default: `/(?:\S)/`
+ * __url__ - String|Object url, по которому будет запрашиваться саджест. default: `"http://suggests.go.mail.ru/sg_u?q={query}"`
+ пример (обе записи идентичны):
+```
+SG({
+    url: "http://suggests.go.mail.ru/sg_u?q={query}"
+})
+```
+SG({
+    url: {
+        scheme: 'http',
+        authority: 'suggests.go.mail.ru',
+        path: "sg_u",
+        query: {
+            q: '{query}'
+        }
+    }
+})
+```
  * __callbackParam__ - default: `"callback"`
  * __reqTimeout__ - default: `5000`
  * __reqMax__ - default: `2`
