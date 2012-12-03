@@ -2800,6 +2800,14 @@ Suggest.opts = {
 	debug: false
 };
 
+/**
+ * Уставливает глобальные настройки
+ * @param {Object} options 
+ */
+Suggest.setup = function( options ) {
+	extend( true, Suggest.opts, options );
+};
+
 
 // Шарим все, что может понадобиться
 Suggest.expando = EXPANDO;

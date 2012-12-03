@@ -169,6 +169,6 @@ options.onEnable = onEnable;
 options.onDisable = onDisable;
 
 // merge default options with go.mail.ru options
-utils.ext( true, sg.opts, options );
+sg.setup( options );
 
-})(SG);
+})( SG );
