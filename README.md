@@ -416,6 +416,7 @@ SG.utils.parseJSON( jsonstring )
 ```
  * __template__ - String|CSSSelector|DOMNode
  * __data__ - Object
+based on [John Resig - JavaScript Micro-Templating](http://ejohn.org/blog/javascript-micro-templating/)
 
 ### SG.utils.$
 ```
@@ -447,6 +448,9 @@ SG.setup({
 }); 
 ```
 устанавливает глобальные настройки саджестов
+
+### SG.tmpl
+alias `SG.utils.tmpl`
 
 ### SG.$
 alias `SG.utils.$`
