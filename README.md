@@ -1,6 +1,16 @@
 # SG
 Поисковые подсказоньки
 
+## Сборка
+Для сборки используется [grunt](https://github.com/gruntjs/grunt/). Пример сборки приводится с учетом, что grunt уже установлен.
+```
+git clone https://github.com/DriverX/SG.git
+cd SG
+npm install grunt-replace
+grunt
+ls -l sg*
+```
+
 ## Простой пример
 ```html
 <!doctype html>
