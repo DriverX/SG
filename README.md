@@ -43,9 +43,10 @@ All done!
  * __utils__ - полезные утилиты
  * __opts__ - глобальные настройки саджестов
  
-### Event
+## SG.Event
 `SG.Event` предоставляет простой интерфейс для работы с событиями. Поддерживает как DOMEvent, так и кастомные события, как на DOMNode, так и на любой произвольном объекте.
-#### Event.add
+
+### Event.add
 ```
 SG.Event.add( elem, event, callback )
 ```
@@ -67,7 +68,7 @@ SG.Event.add( elem, "click", function( event ) {
 });
 ```
 
-#### Event.rm
+### Event.rm
 ```
 1) SG.Event.rm( elem )
 2) SG.Event.rm( elem, event )
@@ -80,12 +81,351 @@ SG.Event.add( elem, "click", function( event ) {
 2) Удаляет все обработчики только с указанных событий
 3) Удаляет только определенный обработчик с определенного события 
 
-### evt
+## SG.evt
+Содержит в себе все возможные события в саджестах
+ * __open__ - 
+ * __openEnd__ - 
+ * __close__ - 
+ * __closeEnd__ - 
+ * __enable__ - 
+ * __enableEnd__ - 
+ * __disable__ - 
+ * __disableEnd__ - 
+ * __destroy__ - 
+ * __destroyEnd__ - 
+ * __blockRequest__ - 
+ * __successRequest__ - 
+ * __completeRequest__ - 
+ * __stopRequest__ - 
+ * __errorRequest__ - 
+ * __startRequest__ - 
+ * __sendRequest__ - 
+ * __passFilter__ - 
+ * __failFilter__ - 
+ * __rejectData__ - 
+ * __acceptData__ - 
+ * __render__ - 
+ * __renderEnd__ - 
+ * __focus__ - 
+ * __focusEnd__ - 
+ * __select__ - 
+ * __selectEnd__ - 
+ * __valueChange__ - 
+ * __flushCache__ - 
+ * __flushCacheEnd__ - 
+ * __setCache__ - 
+ * __setCacheEnd__ - 
+ * __getCache__ - 
+ * __getCacheEnd__ - 
 
+## SG.utils
+### SG.utils.isArr
+```
+SG.utils.isArr( some_var )
+```
+Возвращает `true` если `some_var` - Array
 
-### utils
+### SG.utils.isFn
+```
+SG.utils.isFn( some_var )
+```
+Возвращает `true` если `some_var` - Function
 
-### opts
+### SG.utils.isObj
+```
+SG.utils.isObj( some_var )
+```
+Возвращает `true` если `some_var` - Plain Object (`{}`)
+
+### SG.utils.isWin
+```
+SG.utils.isWin( some_var )
+```
+Возвращает `true` если `some_var` - Window
+
+### SG.utils.bind
+```
+SG.utils.bind( fn, context[, arg1[, ...[, argN]]])
+```
+ * __fn__ - Function - функция, к которой привязывается контекст
+ * __context__ - Object|Null - привязываемый контекст
+ * __argN__ - Mixed параметры, которые будут переданы `fn` при вызове
+ 
+Биндит контекст к функции 
+
+### SG.utils.ext
+```
+1) SG.utils.ext( obj, extObj[, extObj1[, ...[, extObjN]]] )
+2) SG.utils.ext( true, obj, extObj[, extObj1[, ...[, extObjN]]] )
+```
+Аналогичная с jQuery.extend
+
+### SG.utils.copy
+```
+SG.utils.ext( obj )
+```
+ * __obj__ - Object|Array
+Копирует объект или массив и возвращает копию
+
+### SG.utils.trim
+```
+SG.utils.trim( str )
+```
+ * __str__ - String
+Отрезает пробельные символы с начала и конца строки
+
+### SG.utils.arrEach
+```
+SG.utils.arrEach( arr, iter_fn( value, key ) )
+```
+ * __arr__ - Array|ArrayLike
+ * __iter_fn__ - Function
+Обходит массив и при каждой итерации вызывает `iter_fn`
+
+### SG.utils.objEach
+```
+SG.utils.objEach( obj, iter_fn( value, key ) )
+```
+ * __obj__ - Object
+ * __iter_fn__ - Function
+Обходит объект и при каждой итерации вызывает `iter_fn`
+
+### SG.utils.each
+```
+SG.utils.each( obj, iter_fn( value, key ) )
+```
+ * __obj__ - Object|Array|ArrayLike
+ * __iter_fn__ - Function
+Обходит объект, будь то массив или plain object, и при каждой итерации вызывает `iter_fn`
+
+### SG.utils.map
+alias `Array.map`
+
+### SG.utils.indexOf
+alias `Array.indexOf`
+
+### SG.utils.format
+```
+SG.utils.format( str, replace )
+```
+ * __str__ - String строка, в которой будет произведен поиск и замена
+ * __replace__ - Object объект с заменани, например `{foo: "bar"}`
+Поиск и замена в `str` конструкций вида `{some_macros}` на значение ключен из `replace`
+```javascript
+SG.utils.format( "Hello! My name is {name}. Good {daytime}!", {
+    name: "DriverX",
+    daytime: "night"
+})
+// Hello! My name is DriverX. Good night!
+```
+
+### SG.utils.objFormat
+```
+SG.utils.objFormat( obj, replace )
+```
+ * __str__ - Object объект, в свойствах которого будет произведен поиск и замена. Причем обрабатываются и вложенные объекты.
+ * __replace__ - Object объект с заменани, например `{foo: "bar"}`
+Поиск и замена в `obj` конструкций вида `{some_macros}` на значение ключен из `replace`
+```javascript
+SG.utils.objFormat({
+    foo: "Hello, {name}!",
+    bar: "Goodbye, {name} and good {daytime}!"
+}, {
+    name: "World",
+    daytime: "night"
+})
+// {foo: "Hello, World!", bar: "Goodbye, World and good night!"}
+```
+
+### SG.utils.walker
+```
+1) SG.utils.walker( obj, route )
+2) SG.utils.walker( obj, route, value )
+```
+ * __obj__ - Object
+ * __route__ - String путь до свойства
+ * __value__ - Mixed устанавливаемое значение
+Идет по объекту `obj` с помощью дескриптора `route`, который в свой очередь представляет из себя запись обращения к свойствах объекта, например `foo.bar.bar` 
+1) Получает значение свойства. Если св-во не было найдено, то возвращает `null`
+2) Устанавливает значение св-ва. Если объекта по пути не было, то он будет создан.
+
+### SG.utils.from
+```
+SG.utils.from( some )
+```
+ * __some__ - Mixed
+Создает массив из одного элемента, если `some` не был Array, или пустой, если `some === null || some === undefined`. Иначе возвращает `some` нетронутым
+
+### SG.utils.mkarr
+```
+SG.utils.mkarr( arrlike )
+```
+ * __arrlike__ - Array|ArrayLike
+Создает Array из `arrlike`, если `arrlike` уже был Array, то вернеться его копия
+
+### SG.utils.prm
+```
+SG.utils.prm( params )
+```
+ * __params__ - Object
+Сериализует `params` в querystring
+
+### SG.utils.aprm
+```
+SG.utils.aprm( url, params )
+```
+ * __url__ - String
+ * __params__ - Object|String
+Добавляет к `url` параметры `params`
+
+### SG.utils.url
+```
+SG.utils.url( parts )
+```
+ * __parts__ - Object
+Создает URL из `parts`.
+Пример:
+```javascript
+SG.utils.url({
+    scheme: "http",
+    authority: "site.com",
+    path: "path",
+    query: "foo=bar" // or {foo: "bar"}
+    fragment: "fragment"
+});
+// http://site.com/path?foo=bar#fragment
+```
+
+### SG.utils.css
+```
+1) SG.utils.css( elem )
+2) SG.utils.css( elem, cssProp )
+3) SG.utils.css( elem, cssProp, cssValue ) 
+```
+ * __elem__ - DOMNode
+ * __cssProp__ - String
+ * __cssValue__ - String|Number
+Получает или устанавливает css св-во `cssProp` элемента `elem`
+1) получает все css св-ва
+2) получает значение css св-ва `cssProp`
+3) устанавливает значение `cssProp: cssValue`
+
+### SG.utils.addCls
+```
+SG.utils.addCls( elem, classname )
+```
+ * __elem__ - DOMNode
+ * __classname__ - String
+Добавляет элементу класс `classname`.
+
+### SG.utils.rmCls
+```
+SG.utils.rmCls( elem[, classname] )
+```
+ * __elem__ - DOMNode
+ * __classname__ - String
+Удаляет у элемента класс `classname`, если `classname` не был передан, то будут удалены все классы.
+
+### SG.utils.hasCls
+```
+SG.utils.hasCls( elem, classname )
+```
+ * __elem__ - DOMNode
+ * __classname__ - String
+Проверяет, есть ли класс `classname` у элемента `elem`. Возвращает `true`, если был найден.
+
+### SG.utils.cres
+```
+SG.utils.cres( html )
+ * __html__ - String html
+```
+Создает DOM-структуру по переданному html коду и возвращает созданные элементы в массиве.
+
+### SG.utils.cre
+```
+1) SG.utils.cre( nodeName )
+2) SG.utils.cre( html )
+```
+ * __nodeName__, __html__ - String
+Создает DOM по переданному html-коду, или DOMNode по имени элемента
+
+### SG.utils.rme
+```
+SG.utils.rme( elem )
+```
+ * __elem__ - DOMNode
+Удаляет `elem` из DOM
+
+### SG.utils.empty
+```
+SG.utils.empty( elem )
+```
+ * __elem__ - DOMNode
+Очищает `elem`
+
+### SG.utils.attr
+```
+1) SG.utils.attr( elem, attr )
+2) SG.utils.attr( elem, attr, value )
+```
+ * __elem__ - DOMNode
+ * __attr__ - String
+ * __value__ - String|Number
+Получает или устанавливает аттрибут у `elem`
+
+### SG.utils.hasFocus
+```
+SG.utils.hasFocus( elem )
+```
+ * __elem__ - DOMNode 
+Возвращает `true`, если на элемент установлен focus
+
+### SG.utils.contains
+```
+SG.utils.contains( parent, child )
+```
+ * __parent__ - DOMNode
+ * __child__ - DOMNode
+Возвращает `true`, если `child` был найден в `parent` 
+
+### SG.utils.parseXML
+```
+SG.utils.parseXML( xmlstring )
+```
+ * __xmlstring__ - String
+
+### SG.utils.parseJSON
+```
+SG.utils.parseJSON( jsonstring )
+```
+ * __jsonstring__ - String
+
+### SG.utils.tmpl
+```
+1) SG.utils.tmpl( template )
+2) SG.utils.tmpl( template, data )
+```
+ * __template__ - String|CSSSelector|DOMNode
+ * __data__ - Object
+
+### SG.utils.$
+```
+SG.utils.$( selector[, root])
+```
+ * __selector__ - DOMNode|String
+ * __root__ - DOMNode|String
+Ищет элемент по css-селектору `selector`, в `root`, если был передан, иначе в `document`
+
+### SG.utils.$$
+```
+SG.utils.$$( selector[, root])
+```
+ * __selector__ - DOMNode|String
+ * __root__ - DOMNode|String
+Ищет элементы по css-селектору `selector`, в `root`, если был передан, иначе в `document`, и возвращает Array
+
+### SG.utils.Event
+alias SG.Event
 
 
 ## Static methods

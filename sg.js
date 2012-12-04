@@ -2440,6 +2440,8 @@ function Suggest( inputOptions ) {
 	if( options.enabled ) {
 		enable();
 	}
+	
+	console.log(String(Object.keys(SGUtils)));
 }
 
 
