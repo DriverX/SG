@@ -44,8 +44,44 @@ All done!
  * __opts__ - глобальные настройки саджестов
  
 ### Event
+`SG.Event` предоставляет простой интерфейс для работы с событиями. Поддерживает как DOMEvent, так и кастомные события, как на DOMNode, так и на любой произвольном объекте.
+#### Event.add
+```
+SG.Event.add( elem, event, callback )
+```
+ * __elem__ - DOMNode|Object объект к которому привязывается обработчик на событие `event`
+ * __event__ - String событие. Возможно указание нескольких событий, достаточно разделить их пробелом, например `"focus blur"`
+ * __callback__ - Function
+
+Метод добавления обработчиков событий
+
+Пример:
+```javascript
+var elem = document.getElementById("some_link"),
+	i = 0;
+SG.Event.add( elem, "click", function( event ) {
+	i++;
+	this.innerHTML = "i = " + i;
+	
+	event.preventDefault();
+});
+```
+
+#### Event.rm
+```
+1) SG.Event.rm( elem )
+2) SG.Event.rm( elem, event )
+2) SG.Event.rm( elem, event, callback )
+```
+ * __elem__ - DOMNode|Object объект, с которого удаляется обработчик события
+ * __event__ - String событие. Возможно указание нескольких событий, достаточно разделить их пробелом, например `"focus blur"`
+ * __callback__ - Function
+1) Удаляет с объекта все обработчики со всех событий
+2) Удаляет все обработчики только с указанных событий
+3) Удаляет только определенный обработчик с определенного события 
 
 ### evt
+
 
 ### utils
 
@@ -54,6 +90,13 @@ All done!
 
 ## Static methods
 ### setup
+```javascript
+SG.setup({
+    ajax: {
+        dataType: "json"
+    }
+}); 
+```
 устанавливает глобальные настройки саджестов
 
 ### $
@@ -214,8 +257,6 @@ instance.getState()
  * __items__ - элементы саджестов
 
 
-
-
 ## Конструктор
 Все экземпляры саджестов создаются только одним способом:
 ```javascript
@@ -242,7 +283,7 @@ Integer величина в пикселях, на которую следует
 ### shiftY
 Integer величина в пикселях, на которую следует скорректировать по вертикали `cont` относительно 'field'. default: `0`
 ### switcher
-String класс, которые будет добавляться/удаляться, когда `cont` будет показан/убран. Если не указан, то у `cont` будет стираться и добавляться стиль 'display: none'  
+String класс, который будет добавляться/удаляться, когда `cont` будет показан/убран. Если не указан, то у `cont` будет стираться и добавляться стиль 'display: none'  
 ### delay
 Integer интервал, через которые будет проверяться `field` на наличие изменений в значении default: `250`
 ### valMin
@@ -273,13 +314,13 @@ SG({
 ```
 
 ### ajax
- * __dataType__ - String `text|html|xml|json|jsonp` тип получаемых данных. В зависимости от значенния может выбираться разный способ создания запроса. default: `"text"`
+ * __dataType__ - String `text|html|xml|json|jsonp` тип получаемых данных. В зависимости от значенния может выбираться разный способ создания запроса. default: `"jsonp"`
  * __method__ - String `POST|GET` метод отправки запроса default: `"GET"`
  * __data__ - Object параметры добавляемые запрашиваемуму url
  * __contentType__ - String default: `"application/x-www-form-urlencoded; charset=utf-8"`
  * __xhrFields__ - Object поля добавляемые в xhr объект при создании запроса. по умолчанию `withCredentials: false`
  * __jsonp__ - String имя параметра в запросе для передачи имени колбэка при `jsonp` запросах. default: `"callback"`
- * __jsonpCallback__ - String|Function имя колбэка. default: `function() {return "{EXPANDO}_{REQUEST_ID}"}`
+ * __jsonpCallback__ - String|Function имя колбэка, если используется `jsonp`. default: `function() {return "{EXPANDO}_{REQUEST_ID}"}`
  * __scriptCharset__ - String кодировка в которую следует перевести ответ при `jsonp` запросах. default: `"utf-8"`
  * __timeout__ - Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
  * __stackSize__ - Integer максимальное одновременное кол-во запросов. default: `2`
