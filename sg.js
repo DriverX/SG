@@ -819,55 +819,7 @@ SGUtils.tmpl = (function(){
 var extend = SGUtils.ext,
 	isFunction = SGUtils.isFn;
 
-
-// Event object part
-// jQuery port
-var	str__tachEvent = 'tachEvent',
-	str__attachEvent = 'at' + str__tachEvent,
-	str__detachEvent = 'de' + str__tachEvent,
-	str__EventListener = 'EventListener',
-	str__addEventListener = 'add' + str__EventListener,
-	str__removeEventListener = 'remove' + str__EventListener,
-	str__preventDefault = 'preventDefault',
-	str__isDefaultPrevented = 'isDefaultPrevented',
-	str__stopPropagation = 'stopPropagation',
-	str__isPropagationStopped = 'isPropagationStopped',
-	str__stopImmediatePropagation = 'stopImmediatePropagation',
-	str__isImmediatePropagationStopped = 'isImmediatePropagationStopped',
-	eventMigrationProps = ( "altKey attrChange attrName bubbles button cancelable charCode " +
-		"clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler " +
-		"keyCode layerX layerY metaKey newValue offsetX offsetY pageX pageY prevValue " +
-		"relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement " +
-		"view wheelDelta which" ).split(" "),
-	addEvent = document[ str__addEventListener ] ? function( elem, event, fn ) {
-			elem[ str__addEventListener ]( event, fn, false );
-		} : document[ str__attachEvent ] ? function( elem, event, fn ) {
-			elem[ str__attachEvent ]( "on" + event, fn );
-		} : emptyFn,
-	removeEvent = document[ str__addEventListener ] ? function( elem, event, fn ) {
-			elem[ str__removeEventListener ]( event, fn, false );
-		} : document[ str__attachEvent ] ? function( elem, event, fn ) {
-			elem[ str__detachEvent ]( "on" + event, fn );
-		} : emptyFn,
-	oneEvent = function( elem, event, fn ) {
-		addEvent( elem, event, function() {
-			removeEvent( elem, event, arguments.callee );
-			return fn.apply( elem, arguments );
-		});
-	},
-	isDefaultPrevented = function( event ) {
-		return (
-			"defaultPrevented" in event
-				? event.defaultPrevented
-				: "returnValue" in event
-					? !event.returnValue
-					: "getPreventDefault" in event
-						? event.getPreventDefault()
-						: false
-		);
-	};
-
-
+	
 function Suggest( inputOptions ) {
 	var self = this;
 	
@@ -1530,8 +1482,8 @@ function Suggest( inputOptions ) {
 	
 	
 	function viewItemMouseSelect( event ) {
-		event[ str__stopPropagation ]();
-		event[ str__preventDefault ]();
+		event.stopPropagation();
+		event.preventDefault();
 		var	$item = event.currentTarget,
 			index = getIndex( $item );
 		if( index != -1 ) {
@@ -1662,7 +1614,7 @@ function Suggest( inputOptions ) {
 		switch( true ) {
 			// fix chrome cursor position feature
 			case ( !ctrlKey && !shiftKey && ( keyCode == 38 || keyCode == 40 ) && !isClosed() ):
-				event[ str__preventDefault ]();
+				event.preventDefault();
 			break;
 		}
 		
@@ -1681,7 +1633,7 @@ function Suggest( inputOptions ) {
 				var selectApproved = select( $focused, true );
 				
 				if( !options.autoSubmit || selectApproved === false ) {
-					event[ str__preventDefault ]();
+					event.preventDefault();
 				}
 			}
 			break;
@@ -1695,7 +1647,7 @@ function Suggest( inputOptions ) {
 				// Для FF. Если на запросе было выделение, то он его сохраняет,
 				// поэтому нужно сбросить немного подождав
 				setTimeout( revertResult, 15 );
-				event[ str__preventDefault ]();
+				event.preventDefault();
 			}
 			break;
 			
@@ -1969,11 +1921,11 @@ function Suggest( inputOptions ) {
 						// Этот ад нужен для того, чтобы Firefox вел себя по стандартам.
 						// dispatchEvent не должен сабмитить форму.
 						// Используем нативное навешивание события, чтобы хендлер вызвался гарантированно последним
-						oneEvent( $form, "submit", function( event ) {
+						Evt.natOne( $form, "submit", function( event ) {
 							event = event || window.event;
 							defaultPrevented = isDefaultPrevented( event );
 							
-							EventProto.preventDefault.call({
+							Suggest.Event.Event.prototype.preventDefault.call({
 								origEvt: event
 							});
 						});
@@ -2005,13 +1957,13 @@ function Suggest( inputOptions ) {
 			selectEnd();
 		} else {
 			// Используем нативное навешивание события, чтобы хендлер вызвался гарантированно последним
-			if( document[ str__addEventListener ] ) {
-				oneEvent( $form, "submit", selectEnd );
+			if( "addEventListener" in document ) {
+				Evt.natOne( $form, "submit", selectEnd );
 			} else {
 				// Для гребанного IE вызываем хендлер по таймауту,
 				// т.к. вызов хендлеров навешанных на событие происходит в обратном порядке
 				// т.е. навешанный последним хендлер будет вызван первым. WTF?!
-				oneEvent( $form, "submit", function() {
+				Evt.natOne( $form, "submit", function() {
 					setTimeout( selectEnd, 50 );
 				});
 			}
@@ -3228,6 +3180,9 @@ utils.objEach( mouselenterFixObject, function( orig, fix ) {
 
 
 // share
+Event.natAdd = addEvent;
+Event.natRm = removeEvent;
+Event.natOne = oneEvent;
 sg.Event = Event;
 utils.Event = Event; // deprecated
 
