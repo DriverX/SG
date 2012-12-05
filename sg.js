@@ -2,7 +2,7 @@
 	
 var	
 	document = window.document,
-	isOpera = /opera/i.test( window.navigator.userAgent ) && !!window.opera,
+	// deprecated isOpera = /opera/i.test( window.navigator.userAgent ) && !!window.opera,
 	
 	// Props name
 	str__proto = "prototype",
@@ -1609,7 +1609,7 @@ function Suggest( inputOptions ) {
 			shiftKey = event.shiftKey,
 			ctrlKey = event.ctrlKey,
 			altKey = event.altKey;
-		
+			
 		// Проверки без задержки
 		switch( true ) {
 			// fix chrome cursor position feature
@@ -2100,7 +2100,7 @@ function Suggest( inputOptions ) {
 		Evt.add( $container, "mouseup", eventContainerMUp );
 		
 		// Обработчики клавиатурного управления
-		Evt.add( $field, isOpera ? "keypress" : "keydown", eventFieldKeyDown );
+		Evt.add( $field, "keydown", eventFieldKeyDown );
 		Evt.add( $field, "keyup", eventFieldKeyUp );
 		
 		// Коррекция  расположения блока саджестов
@@ -2123,7 +2123,7 @@ function Suggest( inputOptions ) {
 		Evt.rm( $container, "mouseup", eventContainerMUp );
 		
 		// Обработчик клавиатурного управления
-		Evt.rm( $field, isOpera ? "keypress" : "keydown", eventFieldKeyDown );
+		Evt.rm( $field, "keydown", eventFieldKeyDown );
 		Evt.rm( $field, "keyup", eventFieldKeyUp );
 		
 		if( options.correction && eventWindowResize ) {
