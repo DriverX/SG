@@ -56,8 +56,8 @@ var options = {
 				}
 				
 				if (data.sites) {
-					for (i = 0, l = data.sites.length; i < l; i++) {
-                        data.items.unshift(data.sites[i]);
+					for (l = data.sites.length; l--;) {
+                        data.items.unshift(data.sites[l]);
 					}
 				}
 			}
