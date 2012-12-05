@@ -356,8 +356,8 @@ SG.utils.hasCls( elem, classname )
 ### SG.utils.cres
 ```
 SG.utils.cres( html )
- * __html__ - String html
 ```
+ * __html__ - String html
 Создает DOM-структуру по переданному html коду и возвращает созданные элементы в массиве.
 
 ### SG.utils.cre
