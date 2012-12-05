@@ -2,7 +2,7 @@
 Поисковые подсказоньки
 
 ## Сборка
-Для сборки используется [grunt](https://github.com/gruntjs/grunt/). Пример сборки приводится с учетом, что grunt уже установлен.
+Для сборки используется [grunt](https://github.com/gruntjs/grunt/). grunt уже установлен.
 ```
 git clone https://github.com/DriverX/SG.git
 cd SG
@@ -65,8 +65,6 @@ SG.Event.add( elem, event, callback )
  * __callback__ - Function
 
 Метод добавления обработчиков событий
-
-Пример:
 ```javascript
 var elem = document.getElementById("some_link"),
 	i = 0;
@@ -87,6 +85,7 @@ SG.Event.add( elem, "click", function( event ) {
  * __elem__ - DOMNode|Object объект, с которого удаляется обработчик события
  * __event__ - String событие. Возможно указание нескольких событий, достаточно разделить их пробелом, например `"focus blur"`
  * __callback__ - Function
+
 1) Удаляет с объекта все обработчики со всех событий
 2) Удаляет все обработчики только с указанных событий
 3) Удаляет только определенный обработчик с определенного события
@@ -98,6 +97,7 @@ SG.Event.fire( elem, event[, extra] )
  * __elem__ - DOMNode|Object
  * __event__ - String
  * __extra__ - Array
+
 Возбуждает событие `event` у элемента `elem`, с дополнительными параметрами `extra` обработчику, если были переданы
 
 ## SG.evt
@@ -199,28 +199,20 @@ SG.utils.trim( str )
 ```
 SG.utils.arrEach( arr, iter_fn( value, key ) )
 ```
- * __arr__ - Array|ArrayLike
- * __iter_fn__ - Function
-
-Обходит массив и при каждой итерации вызывает `iter_fn`
+alias `Array.forEach`
 
 ### SG.utils.objEach
 ```
 SG.utils.objEach( obj, iter_fn( value, key ) )
 ```
- * __obj__ - Object
- * __iter_fn__ - Function
-
-Обходит объект и при каждой итерации вызывает `iter_fn`
+как `SG.utils.arrEach`, но для объектов
 
 ### SG.utils.each
 ```
 SG.utils.each( obj, iter_fn( value, key ) )
 ```
- * __obj__ - Object|Array|ArrayLike
- * __iter_fn__ - Function
+ * __obj__ - Array|Object
 
-Обходит объект, будь то массив или plain object, и при каждой итерации вызывает `iter_fn`
 
 ### SG.utils.map
 alias `Array.map`
@@ -237,11 +229,11 @@ SG.utils.format( str, replace )
 
 Поиск и замена в `str` конструкций вида `{some_macros}` на значение ключен из `replace`
 ```javascript
-SG.utils.format( "Hello! My name is {name}. Good {daytime}!", {
-    name: "DriverX",
-    daytime: "night"
+SG.utils.format( "Hello, {name}! Nice {time}!", {
+    name: "World",
+    daytime: "day"
 })
-// Hello! My name is DriverX. Good night!
+// Hello, World! Nice day!
 ```
 
 ### SG.utils.objFormat
@@ -251,7 +243,7 @@ SG.utils.objFormat( obj, replace )
  * __str__ - Object объект, в свойствах которого будет произведен поиск и замена. Причем обрабатываются и вложенные объекты.
  * __replace__ - Object объект с заменани, например `{foo: "bar"}`
 
-Поиск и замена в `obj` конструкций вида `{some_macros}` на значение ключен из `replace`
+Поиск и замена в `obj` конструкций вида `{some_macros}` на значение ключей из `replace`
 ```javascript
 SG.utils.objFormat({
     foo: "Hello, {name}!",
@@ -316,7 +308,6 @@ SG.utils.url( parts )
  * __parts__ - Object
 
 Создает URL из `parts`.
-Пример:
 ```javascript
 SG.utils.url({
     scheme: "http",
@@ -593,7 +584,6 @@ instance.on( event, callback )
  * __callback__ - Function
  
 Подписаться на событие
-
 ```javascript
 instance.on( SG.evt.close, function( suggestValue ) {
     // do something
@@ -608,7 +598,6 @@ instance.off( event, callback )
  * __callback__ - Function
 
 Отписаться от события
-
 ```javascript
 instance.on( SG.evt.close, function( suggestValue ) {
 	// do something
@@ -652,7 +641,6 @@ instance.getState()
 
 
 ## Конструктор
-Все экземпляры саджестов создаются только одним способом:
 ```javascript
 SG( options );
 ```
@@ -688,7 +676,8 @@ Integer максимальное кол-во символов для сраба�
 RegExp|Function фильтр, при положительном срабатывании которого будет срабатывать саджест default: `/(?:\S)/`
 ### url
 String|Object url, по которому будет запрашиваться саджест. default: `"http://suggests.go.mail.ru/sg_u?q={query}"`
-пример (обе записи идентичны):
+
+обе записи идентичны:
 ```
 SG({
     url: "http://suggests.go.mail.ru/sg_u?q={query}"
