@@ -759,3 +759,17 @@ Integer задержка при выборе саджеста с клавиат�
 ### preview
 Boolean если `true`, то подставляет запрос выделенного саджеста в `field`. Работает только если выбирать саджест с клавиатуры. default: `true`
 
+### on{SG.evt.*}
+Помогает привязаться к событие сразу из конфига
+```javascript
+var instance = SG({
+    field: "#foo",
+    onEnable: function() { // same instance.on(SG.evt.enable, function() {}) 
+    	// do something
+    },
+    onDisable: function() { // same instance.on(SG.evt.disable, function() {})
+    	// do something
+    }
+});
+
+
