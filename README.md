@@ -184,6 +184,7 @@ SG.utils.bind( fn, context[, arg1[, ...[, argN]]])
 SG.utils.ext( obj )
 ```
  * __obj__ - Object|Array
+
 Копирует объект или массив и возвращает копию
 
 ### SG.utils.trim
@@ -191,6 +192,7 @@ SG.utils.ext( obj )
 SG.utils.trim( str )
 ```
  * __str__ - String
+
 Отрезает пробельные символы с начала и конца строки
 
 ### SG.utils.arrEach
@@ -199,6 +201,7 @@ SG.utils.arrEach( arr, iter_fn( value, key ) )
 ```
  * __arr__ - Array|ArrayLike
  * __iter_fn__ - Function
+
 Обходит массив и при каждой итерации вызывает `iter_fn`
 
 ### SG.utils.objEach
@@ -207,6 +210,7 @@ SG.utils.objEach( obj, iter_fn( value, key ) )
 ```
  * __obj__ - Object
  * __iter_fn__ - Function
+
 Обходит объект и при каждой итерации вызывает `iter_fn`
 
 ### SG.utils.each
@@ -215,6 +219,7 @@ SG.utils.each( obj, iter_fn( value, key ) )
 ```
  * __obj__ - Object|Array|ArrayLike
  * __iter_fn__ - Function
+
 Обходит объект, будь то массив или plain object, и при каждой итерации вызывает `iter_fn`
 
 ### SG.utils.map
@@ -229,6 +234,7 @@ SG.utils.format( str, replace )
 ```
  * __str__ - String строка, в которой будет произведен поиск и замена
  * __replace__ - Object объект с заменани, например `{foo: "bar"}`
+
 Поиск и замена в `str` конструкций вида `{some_macros}` на значение ключен из `replace`
 ```javascript
 SG.utils.format( "Hello! My name is {name}. Good {daytime}!", {
@@ -244,6 +250,7 @@ SG.utils.objFormat( obj, replace )
 ```
  * __str__ - Object объект, в свойствах которого будет произведен поиск и замена. Причем обрабатываются и вложенные объекты.
  * __replace__ - Object объект с заменани, например `{foo: "bar"}`
+
 Поиск и замена в `obj` конструкций вида `{some_macros}` на значение ключен из `replace`
 ```javascript
 SG.utils.objFormat({
@@ -264,6 +271,7 @@ SG.utils.objFormat({
  * __obj__ - Object
  * __route__ - String путь до свойства
  * __value__ - Mixed устанавливаемое значение
+
 Идет по объекту `obj` с помощью дескриптора `route`, который в свой очередь представляет из себя запись обращения к свойствах объекта, например `foo.bar.bar` 
 1) Получает значение свойства. Если св-во не было найдено, то возвращает `null`
 2) Устанавливает значение св-ва. Если объекта по пути не было, то он будет создан.
@@ -273,6 +281,7 @@ SG.utils.objFormat({
 SG.utils.from( some )
 ```
  * __some__ - Mixed
+
 Создает массив из одного элемента, если `some` не был Array, или пустой, если `some === null || some === undefined`. Иначе возвращает `some` нетронутым
 
 ### SG.utils.mkarr
@@ -280,6 +289,7 @@ SG.utils.from( some )
 SG.utils.mkarr( arrlike )
 ```
  * __arrlike__ - Array|ArrayLike
+
 Создает Array из `arrlike`, если `arrlike` уже был Array, то вернеться его копия
 
 ### SG.utils.prm
@@ -287,6 +297,7 @@ SG.utils.mkarr( arrlike )
 SG.utils.prm( params )
 ```
  * __params__ - Object
+
 Сериализует `params` в querystring
 
 ### SG.utils.aprm
@@ -295,6 +306,7 @@ SG.utils.aprm( url, params )
 ```
  * __url__ - String
  * __params__ - Object|String
+
 Добавляет к `url` параметры `params`
 
 ### SG.utils.url
@@ -302,6 +314,7 @@ SG.utils.aprm( url, params )
 SG.utils.url( parts )
 ```
  * __parts__ - Object
+
 Создает URL из `parts`.
 Пример:
 ```javascript
@@ -324,6 +337,7 @@ SG.utils.url({
  * __elem__ - DOMNode
  * __cssProp__ - String
  * __cssValue__ - String|Number
+
 Получает или устанавливает css св-во `cssProp` элемента `elem`
 1) получает все css св-ва
 2) получает значение css св-ва `cssProp`
@@ -335,6 +349,7 @@ SG.utils.addCls( elem, classname )
 ```
  * __elem__ - DOMNode
  * __classname__ - String
+
 Добавляет элементу класс `classname`.
 
 ### SG.utils.rmCls
@@ -343,6 +358,7 @@ SG.utils.rmCls( elem[, classname] )
 ```
  * __elem__ - DOMNode
  * __classname__ - String
+
 Удаляет у элемента класс `classname`, если `classname` не был передан, то будут удалены все классы.
 
 ### SG.utils.hasCls
@@ -351,6 +367,7 @@ SG.utils.hasCls( elem, classname )
 ```
  * __elem__ - DOMNode
  * __classname__ - String
+
 Проверяет, есть ли класс `classname` у элемента `elem`. Возвращает `true`, если был найден.
 
 ### SG.utils.cres
@@ -358,6 +375,7 @@ SG.utils.hasCls( elem, classname )
 SG.utils.cres( html )
 ```
  * __html__ - String html
+
 Создает DOM-структуру по переданному html коду и возвращает созданные элементы в массиве.
 
 ### SG.utils.cre
@@ -366,6 +384,7 @@ SG.utils.cres( html )
 2) SG.utils.cre( html )
 ```
  * __nodeName__, __html__ - String
+
 Создает DOM по переданному html-коду, или DOMNode по имени элемента
 
 ### SG.utils.rme
@@ -373,6 +392,7 @@ SG.utils.cres( html )
 SG.utils.rme( elem )
 ```
  * __elem__ - DOMNode
+
 Удаляет `elem` из DOM
 
 ### SG.utils.empty
@@ -380,6 +400,7 @@ SG.utils.rme( elem )
 SG.utils.empty( elem )
 ```
  * __elem__ - DOMNode
+
 Очищает `elem`
 
 ### SG.utils.attr
@@ -390,6 +411,7 @@ SG.utils.empty( elem )
  * __elem__ - DOMNode
  * __attr__ - String
  * __value__ - String|Number
+
 Получает или устанавливает аттрибут у `elem`
 
 ### SG.utils.hasFocus
@@ -397,6 +419,7 @@ SG.utils.empty( elem )
 SG.utils.hasFocus( elem )
 ```
  * __elem__ - DOMNode 
+
 Возвращает `true`, если на элемент установлен focus
 
 ### SG.utils.contains
@@ -405,6 +428,7 @@ SG.utils.contains( parent, child )
 ```
  * __parent__ - DOMNode
  * __child__ - DOMNode
+
 Возвращает `true`, если `child` был найден в `parent` 
 
 ### SG.utils.parseXML
@@ -426,6 +450,7 @@ SG.utils.parseJSON( jsonstring )
 ```
  * __template__ - String|CSSSelector|DOMNode
  * __data__ - Object
+
 based on [John Resig - JavaScript Micro-Templating](http://ejohn.org/blog/javascript-micro-templating/)
 
 ### SG.utils.$
@@ -434,6 +459,7 @@ SG.utils.$( selector[, root])
 ```
  * __selector__ - DOMNode|String
  * __root__ - DOMNode|String
+
 Ищет элемент по css-селектору `selector`, в `root`, если был передан, иначе в `document`
 
 ### SG.utils.$$
@@ -442,6 +468,7 @@ SG.utils.$$( selector[, root])
 ```
  * __selector__ - DOMNode|String
  * __root__ - DOMNode|String
+
 Ищет элементы по css-селектору `selector`, в `root`, если был передан, иначе в `document`, и возвращает Array
 
 ### SG.utils.Event
@@ -525,6 +552,7 @@ instance.destroy()
 instance.show( value )
 ```
  * __value__ - String
+
 Показывает саджест по запросу `value`
 
 ### flushCache
@@ -538,6 +566,7 @@ instance.flushCache()
 instance.focus( index )
 ```
  * __index__ - Number
+
 Ставит фокус на определенный саджест по переданному `index`.
 
 ### moveFocus
@@ -545,6 +574,7 @@ instance.focus( index )
 instance.moveFocus( step )
 ```
  * __step__ - Number
+
 Сдвигает фокус. Если `step` отрицательный, то сдвигает вверх. 
 
 ### select
@@ -552,6 +582,7 @@ instance.moveFocus( step )
 instance.select( index )
 ```
  * __index__ - Number
+
 Выбрать конкретный саджест по индексу.
 
 ### on
