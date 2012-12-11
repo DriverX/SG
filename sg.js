@@ -3179,6 +3179,20 @@ utils.objEach( mouselenterFixObject, function( orig, fix ) {
 });
 
 
+// for inheritance objects
+Event.protoMixin = {
+	on: function( event, cb ) {
+		Event.add( this, event, cb );
+	},
+	off: function( event, cb ) {
+		Event.rm( this, event, cb );
+	},
+	fire: function( event, data ) {
+		Event.fire( this, event, data );
+	}
+};
+
+
 // share
 Event.natAdd = addEvent;
 Event.natRm = removeEvent;
@@ -3307,18 +3321,11 @@ BaseAjax.prototype = {
 	},
 	getResponseHeader: function( name ) {
 		
-	},
-	
-	on: function( event, cb ) {
-		Event.add( this, event, cb );
-	},
-	off: function( event, cb ) {
-		Event.rm( this, event, cb );
-	},
-	fire: function( event, data ) {
-		Event.fire( this, event, data );
 	}
 };
+
+// append Event methods on|off|fire
+utils.ext(BaseAjax.prototype, Event.protoMixin);
 
 
 function XHR( url, options ) {
