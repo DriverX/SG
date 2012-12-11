@@ -3428,7 +3428,9 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 		var self = this,
 			xhr = self._xhr,
 			textStatus = STATUSES[ status ];
-			
+		
+		xhr.abort();
+		
 		self._aborted = true;
 		self._processing = false;
 		self._completed = true;
