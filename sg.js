@@ -3303,7 +3303,7 @@ BaseAjax.prototype = {
 		
 	},
 	_cleanup: function() {
-		
+		this.off();	
 	},
 	
 	// public methods
@@ -3452,12 +3452,15 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 		self._cleanup();
 	},
 	_cleanup: function() {
+		var self = this;
 		self._xhr = null;
 		self._processing = false;
 		self._completed = false;
 		self._aborted = false;
 		self._tmid = null;
 		self._setReqHeaders = {};
+		
+		self.off();
 	},
 	
 	send: function() {
@@ -3628,6 +3631,8 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		self._completed = false;
 		self._aborted = false;
 		self._tmid = null;
+		
+		self.off();
 	},
 	
 	// public methods
