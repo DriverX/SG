@@ -110,7 +110,7 @@ var options = {
 		setTimeout(function() {
 			utils.arrEach(inputs, function(n) {
 				utils.rme(n);
-			})
+			});
 		}, 10);
 	},
 	unselect: function() {

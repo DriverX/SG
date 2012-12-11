@@ -1923,9 +1923,9 @@ function Suggest( inputOptions ) {
 						// Используем нативное навешивание события, чтобы хендлер вызвался гарантированно последним
 						Evt.natOne( $form, "submit", function( event ) {
 							event = event || window.event;
-							defaultPrevented = isDefaultPrevented( event );
+							defaultPrevented = Evt.natIsDefaultPrevented( event );
 							
-							Suggest.Event.Event.prototype.preventDefault.call({
+							Evt.Event.prototype.preventDefault.call({
 								origEvt: event
 							});
 						});
@@ -3183,6 +3183,7 @@ utils.objEach( mouselenterFixObject, function( orig, fix ) {
 Event.natAdd = addEvent;
 Event.natRm = removeEvent;
 Event.natOne = oneEvent;
+Event.natIsDefaultPrevented = isDefaultPrevented;
 sg.Event = Event;
 utils.Event = Event; // deprecated
 
