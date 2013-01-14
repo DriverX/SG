@@ -21,6 +21,7 @@ var
 	Array__indexOf = Array[ str__proto ].indexOf,
 	Array__map = Array[ str__proto ].map,
 	String__trim = String[ str__proto ].trim,
+  Function__bind = Function[ str__proto ].bind,
 	urlEncode = encodeURIComponent,
 	urlDecode = decodeURIComponent,
 	setTimeout = window[ str__setTimeout ],
@@ -112,8 +113,12 @@ var SGUtils = {
 	},
 	
 	bind: function( fn, obj ) {
+    if( Function__bind ) {
+      return Function__bind.apply( fn, Array__slice.call( arguments, 1 ) );
+    }
+
 		var args = Array__slice.call( arguments, 2 ),
-			bound = function() {				
+		  bound = function() {
 				return fn.apply(this instanceof emptyFn ? this : (obj || {}), args.concat(Array__slice.call(arguments)));
 			};
 		emptyFn.prototype = fn.prototype;
@@ -2910,34 +2915,42 @@ var Event = {
 				}
 			}
 		},
-		add: function ( elem, event, handler ) {
-			if( elem && event && utils.isFn( handler ) ) {
+		add: function ( elem, event, handler, /* internal use only */ firstHandler ) {
+			if( elem && event ) {
 				if( elem[ str__setInterval ] && elem != window && !elem.frameElement ) {
 					elem = window;
 				}
 				
+        var handlers = utils.from( handler ),
+            appendMethod = firstHandler ? "unshift" : "push";
 				utils.arrEach( event.split( rWhiteSpaces ), function( eventType ) {
-					if( !handler[ expando ] ) {
-						handler[ expando ] = sg.guid();
-					}
-					
-					var elemGuid = elem[ expando ] = elem[ expando ] || sg.guid(),
-						listeners = Event.c[ elemGuid ] = Event.c[ elemGuid ] || {},
-						eventListeners = listeners[ eventType ] = listeners[ eventType ] || [],
-						eventHandle = eventListeners.handle = function( event, data ) {
-							if( !event || event.type !== Event.fired ) {
-								return Event.handler.call( eventHandle.elem, event, data );
-							}
-						};
-					
-					eventHandle.elem = elem;
-	
-					if( eventListeners.push( handler ) == 1 && ( elem.nodeType || elem[ str__setInterval ] ) ) {
-						var custom = Event.custom && Event.custom[ eventType ] && Event.custom[ eventType ].setup;
-						if( !custom || custom.call( elem, eventHandle ) === false ) {
-							addEvent( elem, eventType, eventListeners.handle );
-						}
-					}
+          utils.arrEach( handlers, function( handler ) {
+            if( !handler || !utils.isFn( handler ) ) {
+              return;
+            }
+
+            if( !handler[ expando ] ) {
+              handler[ expando ] = sg.guid();
+            }
+            
+            var elemGuid = elem[ expando ] = elem[ expando ] || sg.guid(),
+              listeners = Event.c[ elemGuid ] = Event.c[ elemGuid ] || {},
+              eventListeners = listeners[ eventType ] = listeners[ eventType ] || [],
+              eventHandle = eventListeners.handle = function( event, data ) {
+                if( !event || event.type !== Event.fired ) {
+                  return Event.handler.call( eventHandle.elem, event, data );
+                }
+              };
+            
+            eventHandle.elem = elem;
+            
+            if( eventListeners[ appendMethod ]( handler ) == 1 && ( elem.nodeType || elem[ str__setInterval ] ) ) {
+              var custom = Event.custom && Event.custom[ eventType ] && Event.custom[ eventType ].setup;
+              if( !custom || custom.call( elem, eventHandle ) === false ) {
+                addEvent( elem, eventType, eventListeners.handle );
+              }
+            }
+          });
 				});
 			}
 		},
@@ -2951,6 +2964,9 @@ var Event = {
 				})
 			);
 		},
+    first: function( elem, event, handler) {
+      Event.add( elem, event, handler, true );
+    },
 		rm: function ( elem, event, handler ) {
 			if( !elem ) {
 				return;
@@ -3066,7 +3082,22 @@ var Event = {
 			}
 			
 			Event.fired = null;
-		}
+		},
+    copy: function( elemFrom, elemTo, event ) {
+			var	eventObj,
+				elemGuid = elemFrom[ expando ],
+				listeners = elemGuid && Event.c[ elemGuid ],
+				eventListeners = null;
+      if( event != null && listeners && listeners[ event ] ) {
+        eventListeners = {};
+        eventListeners[ event ] = listeners[ event ];
+      } else if( listeners ) {
+        eventListeners = listeners;
+      }
+      utils.objEach( eventListeners, function( handlers, eventType ) {
+        Event.add( elemTo, eventType, handlers );
+      });
+    }
 	};
 
 Event.Event = function( event, props ) {
@@ -3242,9 +3273,49 @@ if( "withCredentials" in xhr || supportXDR ) {
   xhr = null;
 }
 
+// restricted CORS urls storage
+var CORSRestricted = {};
 
+
+// base classes fabric
 function Ajax( url, options ) {
-	var klass,
+  return new TransportWrapper( url, options );
+}
+
+
+// base transport class
+function BaseAjax( url, options ) {
+	var self = this;
+		
+	self._url = url.replace(/#.*$/, "");
+	self._options = options;
+}
+
+BaseAjax.prototype = {
+  // public props
+	readyState: 0,
+	status: -1,
+	statusText: "",
+	responseText: null,
+	responseXML: null,
+
+	// public methods
+	send: function() {},
+	abort: function() {},
+  destroy: function() {},
+	setRequestHeader: function( name, value ) {},
+	getAllResponseHeaders: function() {},
+	getResponseHeader: function( name ) {}
+};
+
+// append Event methods on|off|fire
+utils.ext(BaseAjax.prototype, Event.protoMixin);
+
+
+// wrapper for transport classes
+function TransportWrapper( url, options ) {
+  var self = this,
+    klass,
 		urlParts;
 	
 	options = utils.ext(true, {}, Ajax.defaults, options);
@@ -3263,70 +3334,110 @@ function Ajax( url, options ) {
 	if( !options.dataType ) {
 		throw Error("dataType must be specified");	
 	}
-	
 	options.dataType = options.dataType.toLowerCase();
-	if( options.dataType === "jsonp" ) {
+  
+  self._url = url;
+  self._urlParts = urlParts;
+  self._options = options;
+  self._degraded = false;
+   
+  self._degradeEnabled = false;
+  if( options.CORSDegrade && options.crossDomain ) {
+    self._degradeEnabled = true;
+  }
+  self._CORSFailed = false;
+
+  if( options.dataType === "jsonp"
+      || self._degradeEnabled
+      && (urlParts[1] + "//" + urlParts[2]) in CORSRestricted ) {
+    options.dataType = "jsonp";
+    self._degraded = true;
+    self._degradeEnabled = false;
+  }
+	
+  if( options.dataType === "jsonp" ) {
 		klass = JSONP;	
 	} else {
 		klass = XHR;
 	}
-	return new klass( url, options ); 
-}
+   
+  // main transport instance
+  self._basecls = new klass( url, options );
+  var basecls = self._basecls;
 
-
-function BaseAjax( url, options ) {
-	var self = this;
-		
-	self._url = url.replace(/#.*$/, "");
-	self._options = options;
-	
 	// init callbacks bindings
-  var options_cbs = ["success", "complete", "error"];
-  utils.arrEach(options_cbs, function(cb_name) {
+  var cb_names = ["success", "complete", "error"];
+  utils.arrEach( cb_names, function( cb_name ) {
 		var cb = options[ cb_name ];
 		if( cb && utils.isFn( cb ) ) {
-			self.on( cb_name, cb );
+      basecls.on( cb_name, cb );
 		}
   });
 }
 
-BaseAjax.prototype = {
-	readyState: 0,
-	status: 0,
-	statusText: "",
-	responseText: null,
-	responseXML: null,
-	
-	// protected methods
-	_abort: function( code ) {
-		
-	},
-	_cleanup: function() {
-		this.off();	
-	},
-	
-	// public methods
-	send: function() {
-		
-	},
-	abort: function() {
-		
-	},
-	setRequestHeader: function( name, value ) {
-		
-	},
-	getAllResponseHeaders: function() {
-		
-	},
-	getResponseHeader: function( name ) {
-		
-	}
-};
 
-// append Event methods on|off|fire
-utils.ext(BaseAjax.prototype, Event.protoMixin);
+TransportWrapper.prototype = utils.ext({}, {
+  send: function() {
+    var self = this,
+      options = self._options,
+      basecls = self._basecls;
+    if( self._degradeEnabled ) {
+      Event.first( basecls, "success complete error", function( event ) {
+        var transport = this;
+        if( event.type === "error" ) {
+          if( transport.readyState == 4 && transport.status == 0 ) {
+            self._CORSFailed = true;
+            self._degradeEnabled = false;
+            
+            // TODO
+            if( options.CORSUrlDegrade ) { 
+              var urlParts = self._urlParts;
+              CORSRestricted[ urlParts[1] + "//" + urlParts[2]] = true;
+            }
+          }
+        }
+
+        if( self._CORSFailed ) {
+          event.stopImmediatePropagation();
+        }
+
+        if( event.type === "complete" ) {
+          basecls.off("success complete error", arguments.callee );
+          
+          new_basecls = new JSONP( self._url, options );
+          Event.copy( basecls, new_basecls );
+          basecls = null;
+          self._basecls = new_basecls;
+
+          // resend using jsonp
+          self.send();
+        }
+      });
+    }
+
+    return basecls.send.apply( basecls, arguments );
+  }
+});
 
 
+function wrapMethod( mn ) {
+  return function() {
+    var basecls = this._basecls;
+    return basecls[ mn ].apply( basecls, arguments );
+  };
+}
+// wrap all interface methods
+utils.objEach( BaseAjax.prototype, function( m, mn ) {
+  if( mn in this ) {
+    return;
+  }
+  if( utils.isFn( m ) ) {
+    this[ mn ] = wrapMethod( mn );
+  }
+}, TransportWrapper.prototype);
+
+
+// using XMLHttpRequest transport
 function XHR( url, options ) {
 	var self = this;
 	BaseAjax.call(self, url, options );
@@ -3383,10 +3494,11 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 			AjaxTextStatus,
 			response = null,
 			xml;
-		
+    
 		if( !aborted ) {
 			self.readyState = xhr.readyState;
 			self.status = xhr.status;
+      
 			try {
 				self.statusText = xhr.statusText;
 			} catch(e) {
@@ -3453,9 +3565,9 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 	_cleanup: function() {
 		var self = this;
 		self._xhr = null;
-		self._processing = false;
-		self._completed = false;
-		self._aborted = false;
+		// self._processing = false;
+		// self._completed = false;
+		// self._aborted = false;
 		self._tmid = null;
 		self._setReqHeaders = {};
 		
@@ -3465,7 +3577,7 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 	send: function() {
 		var self = this;
 		if( self._processing ) {
-			throw Error("not supported");
+			throw Error("already processing");
 		}
 		
 		var options = self._options,
@@ -3477,7 +3589,7 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 			
 		xhr = self._getXHR();
 		if( !xhr ) {
-			throw Error("not supported");
+			throw Error("XHR not supported in your browser");
 		}
 		
 		self._xhr = xhr;
@@ -3532,7 +3644,7 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 		}
 		
 		// make request
-		xhr.send( method === "POST" ? urlArgs : null );		
+		return xhr.send( method === "POST" ? urlArgs : null );		
 	},
 	abort: function() {
 		var self = this;
@@ -3543,10 +3655,17 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 	setRequestHeader: function( name, value ) {
 		var self = this;
 		self._setReqHeaders[ name ] = value;
-	}
+	},
+  destroy: function() {
+    var self = this;
+    if( !self._completed ) {
+      self._abort( Ajax.SYSTEM_ABORT );
+    }
+  }
 });
 
 
+// using JSONP transport
 function JSONP( url, options ) {
 	var self = this;
 	BaseAjax.call(self, url, options );
@@ -3569,7 +3688,7 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 			
 			utils.rme(node);
 			node = null;
-			self._script = null;
+      self._script = null;
 			
 			self._complete();
 			
@@ -3626,9 +3745,9 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		// self._script = null;
 		// do not clean, because global callback may execute
 		// self._jsonpCallback = null;
-		self._processing = false;
-		self._completed = false;
-		self._aborted = false;
+		// self._processing = false;
+		// self._completed = false;
+		// self._aborted = false;
 		self._tmid = null;
 		
 		self.off();
@@ -3638,7 +3757,7 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 	send: function() {
 		var self = this;
 		if( self._processing ) {
-			throw Error("not supported");
+			throw Error("already processing");
 		}
 		
 		var options = self._options,
@@ -3674,7 +3793,7 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		}
 		
 		// set onload handler
-		$script.onload = $script.onreadystatechange = utils.bind(self._onload, self);
+		$script.onload = $script.onreadystatechange = utils.bind( self._onload, self );
 
 		$script.src = url;
 		
@@ -3694,19 +3813,27 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
 		
 		// insert script node to head for make request
 		$head.insertBefore( $script, $head.firstChild );
+    return true;
 	},
 	abort: function() {
 		var self = this;
 		if( !self._completed ) {
 			self._abort( Ajax.ABORT_USER );
 		}
-	}
+	},
+  destroy: function() {
+    var self = this;
+    if( !self._completed ) {
+      self._abort( Ajax.SYSTEM_ABORT );
+    }
+  }
 });
 
 // На всякий
 Ajax.XHR = XHR;
 Ajax.JSONP = JSONP;
-
+Ajax.Wrapper = TransportWrapper;
+Ajax.CORSResticted = CORSRestricted;
 
 // default options
 Ajax.defaults = {
@@ -3722,7 +3849,9 @@ Ajax.defaults = {
 	jsonpCallback: function() {
 		return sg.expando + "_" + sg.guid(); 
 	},
-	scriptCharset: "utf-8"
+	scriptCharset: "utf-8",
+  CORSDegrade: false,
+  CORSUrlDegrade: "domain"
 };
 
 // statuses
@@ -3738,6 +3867,7 @@ addStatus("ABORT_USER", stid++, "aborted" );
 addStatus("ABORT_TIMEOUT", stid++, "timeout" );
 addStatus("BAD_STATUS", stid++, "bad status" );
 addStatus("SUCCESS", stid++, "OK" );
+addStatus("SYSTEM_ABORT", stid++, "system aborted" );
 Ajax.STATUSES = STATUSES;
 
 
