@@ -3423,8 +3423,10 @@ TransportWrapper.prototype = utils.ext({}, {
           if( event.type === "complete" ) {
             basecls.off("success complete error", arguments.callee );
             
+            options.dataType = "jsonp";
             new_basecls = new JSONP( self._url, options );
             Event.copy( basecls, new_basecls );
+            basecls.destroy();
             basecls = null;
             self._basecls = new_basecls;
 
@@ -3575,8 +3577,10 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
     
     self.readyState = 4;
     
-    self.fire("error", [ status, textStatus ] );
-    self.fire("complete", [ null, status, textStatus ] );
+    if( status != Ajax.SYSTEM_ABORT ) {
+      self.fire("error", [ status, textStatus ] );
+      self.fire("complete", [ null, status, textStatus ] );
+    }
     
     self._cleanup();
   },
@@ -3753,9 +3757,11 @@ JSONP.prototype = utils.ext({}, BaseAjax.prototype, {
     self._aborted = true;
     self._onload();
     
-    self.fire("error", [ status, statusText ]);
-    self.fire("complete", [ null, status, statusText ] );
-    
+    if( status != Ajax.SYSTEM_ABORT ) {
+      self.fire("error", [ status, statusText ]);
+      self.fire("complete", [ null, status, statusText ] );
+    }
+
     self._cleanup();
   },
   _cleanup: function() {
