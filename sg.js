@@ -21,7 +21,7 @@ var
 	Array__indexOf = Array[ str__proto ].indexOf,
 	Array__map = Array[ str__proto ].map,
 	String__trim = String[ str__proto ].trim,
-  Function__bind = Function[ str__proto ].bind,
+ 	Function__bind = Function[ str__proto ].bind,
 	urlEncode = encodeURIComponent,
 	urlDecode = decodeURIComponent,
 	setTimeout = window[ str__setTimeout ],
@@ -49,6 +49,31 @@ var
 	emptyFn = function() {};
 
 
+// from jQuery
+var curCSS;
+if ( window.getComputedStyle ) {
+	curCSS = function( elem, name ) {
+		var ret, width, minWidth, maxWidth,
+			computed = window.getComputedStyle( elem, null );
+		if( computed ) {
+			ret = computed.getPropertyValue( name ) || computed[ name ];
+		}
+		return ret;
+	};
+} else if ( document.documentElement.currentStyle ) {
+	curCSS = function( elem, name ) {
+		var left, rsLeft,
+			ret = elem.currentStyle && elem.currentStyle[ name ],
+			style = elem.style;
+		if ( ret == null && style && style[ name ] ) {
+			ret = style[ name ];
+		}
+		return ret === "" ? "auto" : ret;
+	};
+}
+	
+	
+	
 
 // Utils
 var SGUtils = {
@@ -526,13 +551,8 @@ var SGUtils = {
 		var ret = null;
 		if( arguments.length > 2 && cssProp ) {
 			elem.style[ cssProp ] = value;
-		} else {
-			var styles = elem.ownerDocument.defaultView.getComputedStyle( elem, null );
-			if( arguments.length == 1 ) {
-				ret = SGUtils.mkarr( styles );
-			} else if( cssProp ) {
-				ret = styles.getPropertyValue( cssProp );
-			}
+		} else if( cssProp ) {
+			ret = curCSS( elem, cssProp );
 		}
 		return ret;
 	},
