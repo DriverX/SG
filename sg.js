@@ -3347,8 +3347,9 @@ function TransportWrapper( url, options ) {
   self._CORSFailed = false;
 
   if( options.dataType === "jsonp"
-      || self._degradeEnabled
-      && (urlParts[1] + "//" + urlParts[2]) in CORSRestricted ) {
+      || self._degradeEnabled 
+      && ( !supportCORS
+        || ( urlParts[1] + "//" + urlParts[2]) in CORSRestricted ) ) {
     options.dataType = "jsonp";
     self._degraded = true;
     self._degradeEnabled = false;
