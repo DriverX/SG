@@ -3389,7 +3389,7 @@ TransportWrapper.prototype = utils.ext({}, {
             self._CORSFailed = true;
             self._degradeEnabled = false;
             
-            // TODO
+            // TODO methods of urls degraded cache
             if( options.CORSUrlDegrade ) { 
               var urlParts = self._urlParts;
               CORSRestricted[ urlParts[1] + "//" + urlParts[2]] = true;
@@ -3399,18 +3399,18 @@ TransportWrapper.prototype = utils.ext({}, {
 
         if( self._CORSFailed ) {
           event.stopImmediatePropagation();
-        }
 
-        if( event.type === "complete" ) {
-          basecls.off("success complete error", arguments.callee );
-          
-          new_basecls = new JSONP( self._url, options );
-          Event.copy( basecls, new_basecls );
-          basecls = null;
-          self._basecls = new_basecls;
+          if( event.type === "complete" ) {
+            basecls.off("success complete error", arguments.callee );
+            
+            new_basecls = new JSONP( self._url, options );
+            Event.copy( basecls, new_basecls );
+            basecls = null;
+            self._basecls = new_basecls;
 
-          // resend using jsonp
-          self.send();
+            // resend using jsonp
+            self.send();
+          }
         }
       });
     }
