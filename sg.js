@@ -3237,6 +3237,7 @@ utils.Event = Event; // deprecated
 ;(function( window, sg ){
 	
 var document = window.document,
+  location = window.location,
 	utils = sg.utils,
 	Event = utils.Event;
 	
@@ -3263,15 +3264,13 @@ function getSimpleXHR() {
 	try {
 		return new ActiveXObject( "Microsoft.XMLHTTP" );
 	} catch(e) {}
+  return null;
 }
 
+
 var xhr = getSimpleXHR(),
-	supportCORS = false,
-	supportXDR = typeof XDomainRequest !== "undefined";
-if( "withCredentials" in xhr || supportXDR ) {
-  supportCORS = true;
-  xhr = null;
-}
+	supportCORS = "withCredentials" in xhr;
+xhr = null;
 
 // restricted CORS urls storage
 var CORSRestricted = {};
@@ -3456,18 +3455,16 @@ XHR.prototype = utils.ext({}, BaseAjax.prototype, {
 		xml: utils.parseXML
 	},
 	_getXHR: function() {
-		var self = this;
-		if( self._options.crossDomain ) {
-			if( supportCORS ) {
-				if( supportXDR ) {	
-					return new XDomainRequest();
-				}
-				return getSimpleXHR();
-			}
-		} else {
-			return getSimpleXHR();
-		}
-		return null;
+		return getSimpleXHR();
+		// if( self._options.crossDomain ) {
+		// 	if( supportCORS ) {
+		// 		if( supportXDR ) {	
+		// 			return new XDomainRequest();
+		// 		}
+		// 	}
+		// } else {
+		// 	return getSimpleXHR();
+		// }
 	},
 	_handleResponse: function() {
 		var self = this,
