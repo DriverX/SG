@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<!-- style for suggests -->
+<style>
+body {font: normal 12px arial, sans-serif;}
+.sg__item_hover {color: red;}
+</style>
+
+<!-- load SG library -->
+<script src="../lib/sg.core.js"></script>
+<script src="../lib/sg.yass.js"></script>
+<script src="../lib/sg.event.js"></script>
+<script src="../lib/sg.ajax.js"></script>
+</head>
+<body>
+	<!-- search form with suggests -->
+	<form action="http://go.mail.ru/search">
+		<input id="query-input" name="q"> <input type="submit"
+			value="Search">
+	</form>
+
+	<!-- main suggests container -->
+	<ul id="sg-items" style="display: none;"></ul>
+
+	<script>
+		var suggests = SG({
+			// field, which will be inserted ыгппуыешщт
+			field : "#query-input",
+			// container for suggests
+			cont : "#sg-items",
+			// template per suggestion
+			item : "<li><%= itemData.textMarked %></li>",
+			url: "http://ilyushenkov.st.mail.ru/sg_u?q={query}",
+			ajax: {
+				dataType: "json",
+				CORSDegrade: true
+			},
+			debug: true
+		});
+	</script>
+</body>
+</html>
+
