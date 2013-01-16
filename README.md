@@ -321,18 +321,16 @@ SG.utils.url({
 
 ### SG.utils.css
 ```
-1) SG.utils.css( elem )
-2) SG.utils.css( elem, cssProp )
-3) SG.utils.css( elem, cssProp, cssValue ) 
+1) SG.utils.css( elem, cssProp )
+2) SG.utils.css( elem, cssProp, cssValue ) 
 ```
  * __elem__ - DOMNode
  * __cssProp__ - String
  * __cssValue__ - String|Number
 
 Получает или устанавливает css св-во `cssProp` элемента `elem`
-1) получает все css св-ва
-2) получает значение css св-ва `cssProp`
-3) устанавливает значение `cssProp: cssValue`
+1) получает значение css св-ва `cssProp`
+2) устанавливает значение `cssProp: cssValue`
 
 ### SG.utils.addCls
 ```
@@ -707,6 +705,7 @@ SG({
  * __scriptCharset__ - String кодировка в которую следует перевести ответ при `jsonp` запросах. default: `"utf-8"`
  * __timeout__ - Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
  * __stackSize__ - Integer максимальное одновременное кол-во запросов. default: `2`
+ * __CORSDegrade__ - Если `true`, то при кроссдоменном запросе, который не смог выполниться из-за политик безопасности, может переключиться на jsonp метод и использвать его. default: `false`
 
 
 ### callbackParam
