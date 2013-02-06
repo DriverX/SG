@@ -465,6 +465,9 @@ SG.utils.$$( selector[, root])
 
 Ищет элементы по css-селектору `selector`, в `root`, если был передан, иначе в `document`, и возвращает Array
 
+SG.utils.$ и SG.utils.$$ использует модифицированную библиотеку поиска элементов по css-селектору [yass](http://yass.webo.in/)
+
+
 ### SG.utils.Event
 alias SG.Event
 
