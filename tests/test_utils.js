@@ -273,8 +273,322 @@ test("objFormat", function() {
 
 
 test("walker", function() {
+  var obj1 = {
+      "foo": {
+        "bar": {
+          "baz": "hello"
+        }
+      },
+      "qux": true
+    };
+
+  // get
+  equal( SG.utils.walker( obj1, "foo.bar.baz" ), "hello" );
+  equal( SG.utils.walker( obj1, "qux" ), true );
+  equal( SG.utils.walker( obj1, "foo.not_exists" ), null );
+
+  // set
+  equal( SG.utils.walker( obj1, "foo.bar.baz", "goodbay" ), "hello" );
+  equal( obj1.foo.bar.baz, "goodbay" );
+
+  equal( SG.utils.walker( obj1, "foo.new_prop", false ), undefined );
+  equal( obj1.foo.new_prop, false );
+
+  equal( SG.utils.walker( obj1, "foo.bar.baz.replace.bla", "alb" ), undefined );
+  equal( obj1.foo.bar.baz.replace.bla, "alb" );
+});
+
+
+test("resc", function() {
+  equal(
+    SG.utils.resc("\\[]{}()^$?+*.-"),
+    "\\\\\\[\\]\\{\\}\\(\\)\\^\\$\\?\\+\\*\\.\\-"
+  );
+});
+
+
+test("from", function() {
+  deepEqual( SG.utils.from(true), [true] );
+  
+  var arr1 = [1,2]
+  equal( SG.utils.from( arr1 ), arr1 );
+  
+  deepEqual( SG.utils.from({foo: "bar"}), [{foo: "bar"}] );
+  deepEqual( SG.utils.from({length: 5}), [{length: 5}] );
+  deepEqual( SG.utils.from(), [] );
+  deepEqual( SG.utils.from(null), [] );
+
+  var fn = function() {};
+  deepEqual( SG.utils.from( fn ), [ fn ] );
+});
+
+
+test("mkarr", function() {
+  var arr = [1,2,,3];
+  var arrlike = {
+      0: 1,
+      1: 2,
+      3: 3,
+      length: 4
+    };
+  
+  deepEqual( SG.utils.mkarr( arr ), [1,2,,3] );
+  deepEqual( SG.utils.mkarr( arrlike ), [1,2,,3] );
+  deepEqual( SG.utils.mkarr( "abcd" ), ["a","b","c","d"] );
+  deepEqual( SG.utils.mkarr( 123 ), [] );
+  deepEqual( SG.utils.mkarr(), [] );
+
+  var $nodes = $("<span>1</span><span>2</span><span>3</span>"),
+    nodes = $("#qunit-fixture").append( $nodes ).get(0).getElementsByTagName("span");
+  
+  equal( SG.utils.mkarr( nodes ).length, 3 );
+  
+  $nodes = nodes = null;
+});
+
+
+test("prm", function() {
+
+  equal(
+    SG.utils.prm({"foo": "bar", "baz": "qux"}),
+    "foo=bar&baz=qux"
+  );
+  equal(
+    SG.utils.prm({"foo": true, "bar": null, "baz": undefined}),
+    "foo=true&bar=null&baz=undefined"
+  );
+  equal(
+    SG.utils.prm(),
+    ""
+  );
+  equal(
+    SG.utils.prm({"foo": "bar", "baz": function() {return "qux";}}),
+    "foo=bar&baz=qux"
+  );
+  equal(
+    SG.utils.prm({"пиво": "пенное"}),
+    "%D0%BF%D0%B8%D0%B2%D0%BE=%D0%BF%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5"
+  );
+});
+
+
+test("aprm", function() {
+  equal( SG.utils.aprm("/", "foo=bar"), "/?foo=bar" );
+  equal( SG.utils.aprm("/?foo=bar", "baz=qux"), "/?foo=bar&baz=qux" );
+  equal( SG.utils.aprm("/?", "foo=bar"), "/?foo=bar" );
+  equal( SG.utils.aprm("/?baz", "foo=bar"), "/?baz&foo=bar" );
+  equal( SG.utils.aprm("/", {"foo": "bar"}), "/?foo=bar" );
+  equal( SG.utils.aprm("", "foo=bar"), "?foo=bar" );
+  equal( SG.utils.aprm(null, "foo=bar"), "null?foo=bar" );
+  equal( SG.utils.aprm(undefined, "foo=bar"), "undefined?foo=bar" );
+  equal( SG.utils.aprm("/"), "/" );
+});
+
+
+test("url", function() {
+  var obj = {
+      scheme: "http",
+      authority: "test.com",
+      path: "test",
+      query: {
+        foo: "bar",
+        baz: "qux"
+      },
+      fragment: {
+        key: "value"
+      }
+    },
+    cobj = SG.utils.copy( obj );
+  
+  equal(
+    SG.utils.url( obj ),
+    "http://test.com/test?foo=bar&baz=qux#key=value"
+  );
+
+  delete obj.scheme;
+  equal(
+    SG.utils.url( obj ),
+    "//test.com/test?foo=bar&baz=qux#key=value"
+  );
+  
+  delete obj.authority;
+  equal(
+    SG.utils.url( obj ),
+    "/test?foo=bar&baz=qux#key=value"
+  );
+
+  delete obj.path;
+  equal(
+    SG.utils.url( obj ),
+    "?foo=bar&baz=qux#key=value"
+  );
+
+  delete obj.query;
+  equal(
+    SG.utils.url( obj ),
+    "#key=value"
+  );
+  
+  delete obj.fragment;
+  equal(
+    SG.utils.url( obj ),
+    ""
+  );
+  
+  obj.scheme = cobj.scheme;
+  equal(
+    SG.utils.url( obj ),
+    ""
+  );
+  
+  obj.authority = cobj.authority;
+  equal(
+    SG.utils.url( obj ),
+    "http://test.com"
+  );
+
+  obj.query = "foo=bar";
+  equal(
+    SG.utils.url( obj ),
+    "http://test.com/?foo=bar"
+  );
+
+  delete obj.query;
+  obj.fragment = "some_fragment";
+  equal(
+    SG.utils.url( obj ),
+    "http://test.com/#some_fragment"
+  );
+});
+
+
+test("css", function() {
+  var node = $("<div class=\"test1\">test test</div>").appendTo("#qunit-fixture").get(0);
+ 
+  // get
+  equal( SG.utils.css( node, "display" ), "none" );
+  equal( SG.utils.css( node, "font-size" ), "14px" );
+  equal( SG.utils.css( node, "blabla" ), undefined );
+  
+  // set
+  SG.utils.css( node, "display", "inline" );
+  equal( SG.utils.css( node, "display" ), "inline" );
+  
+  SG.utils.css( node, "font-size", "200px" );
+  equal( SG.utils.css( node, "font-size" ), "200px" );
+
+  SG.utils.css( node, "blabla", "foobar" );
+  equal( SG.utils.css( node, "blabla" ), undefined );
+  
+  SG.utils.css( node, "position", "absolute" );
+  equal( SG.utils.css( node, "display" ), "block" );
+
+  node = null;
+});
+
+
+test("addCls/rmCls/hasCls", function() {
+  var node = $("<div/>").appendTo("#qunit-fixture").get(0);
+
+  var add = SG.utils.addCls,
+    rm = SG.utils.rmCls,
+    has = SG.utils.hasCls;
+
+  ok( !has( node, "foobar" ) );
+
+  add( node, "foobar" );
+  
+  ok( /(^|\s+)foobar(\s+|$)/.test( node.className ) );
+  ok( has( node, "foobar" ) );
+
+  rm( node, "foobar" );
+  
+  ok( !/(^|\s+)foobar(\s+|$)/.test( node.className ) );
+  ok( !has( node, "foobar" ) );
+
+  add( node, "foobarbaz" );
+
+  ok( !/(^|\s+)foobar(\s+|$)/.test( node.className ) );
+  ok( !has( node, "foobar" ) );
+  ok( has( node, "foobarbaz" ) );
+  
+  rm( node, "foo" );
+  
+  ok( has( node, "foobarbaz" ) );
+
+  add( node, "baz" );
+  
+  ok( has( node, "baz" ) );
+
+  rm( node );
+  
+  ok( !has( node, "baz" ) );
+  ok( !has( node, "foobarbaz" ) );
+  ok( !node.className );
+
+  node = null;
+});
+
+
+test("cre", function() {
+  ok(false);
+});
+
+
+test("cres", function() {
+  ok(false);
+});
+
+
+test("rme", function() {
+  ok(false);
+});
+
+
+test("empty", function() {
+  ok(false);
+});
+
+
+test("attr", function() {
+  ok(false);
+});
+
+
+test("hasFocus", function() {
+  ok(false);
+});
+
+
+test("contains", function() {
+  ok(false);
+});
+
+
+// TODO
+test("parseXML", function() {
   ok(true);
 });
+
+
+// TODO
+test("parseJSON", function() {
+  ok(true);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
