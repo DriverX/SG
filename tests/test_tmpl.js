@@ -6,7 +6,12 @@ test("create from string", function() {
 });
 
 
-test("create from node", function() {
+test("create from DOMNode", function() {
+  ok(false);
+});
+
+
+test("create from selector", function() {
   ok(false);
 });
 
@@ -16,10 +21,14 @@ test("cache string", function() {
 });
 
 
-test("create node", function() {
+test("cache DOMNode", function() {
   ok(false);
 });
 
+
+test("cache selector", function() {
+  ok(false);
+});
 
 
 
