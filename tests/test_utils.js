@@ -577,17 +577,35 @@ test("empty", function() {
 
 
 test("attr", function() {
-  ok(false);
+  var node1 = $("<span title='foo'/>").get(0),
+    node2 = $("<a href='foobar.html'/>").appendTo("#qunit-fixture").get(0),
+    node3 = $("<img border=200>").get(0);
+
+  equal( SG.utils.attr( node1, "title" ), "foo" );
+  equal( SG.utils.attr( node2, "href" ), "foobar.html" );
+  equal( SG.utils.attr( node3, "border" ), "200" );
 });
 
 
 test("hasFocus", function() {
-  ok(false);
+  var field1 = $("<input>").appendTo("#qunit-fixture").focus().get(0);
+
+  ok( SG.utils.hasFocus( field1 ) );
+  field1.blur();
+  ok( !SG.utils.hasFocus( field1 ) );
 });
 
 
 test("contains", function() {
-  ok(false);
+  var $cont = $("#qunit-fixture"),
+    $incont = $("<div>").appendTo( $cont ),
+    $inincont = $("<span>").appendTo( $incont );
+  
+  ok( SG.utils.contains( $cont.get(0), $incont.get(0) ) );
+  ok( SG.utils.contains( $cont.get(0), $inincont.get(0) ) );
+  ok( SG.utils.contains( $incont.get(0), $inincont.get(0) ) );
+  ok( !SG.utils.contains( $inincont.get(0), $incont.get(0) ) );
+  ok( !SG.utils.contains( $incont.get(0), $cont.get(0) ) );
 });
 
 
