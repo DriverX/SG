@@ -159,6 +159,15 @@ test("trim", function() {
 });
 
 
+test("camelCase", function() {
+  equal( SG.utils.camelCase("Foo_bar"), "FooBar" );
+  equal( SG.utils.camelCase(""), "" );
+  equal( SG.utils.camelCase("font-size"), "fontSize" );
+  equal( SG.utils.camelCase("some method"), "someMethod" );
+  equal( SG.utils.camelCase("foo bar-baz_qux"), "fooBarBazQux" );
+});
+
+
 test("arrEach", function() {
   var arr1 = ["foo", "bar", , "baz"];
   
@@ -462,7 +471,7 @@ test("url", function() {
 
 test("css", function() {
   var node = $("<div class=\"test1\">test test</div>").appendTo("#qunit-fixture").get(0);
- 
+
   // get
   equal( SG.utils.css( node, "display" ), "none" );
   equal( SG.utils.css( node, "font-size" ), "14px" );
@@ -473,7 +482,7 @@ test("css", function() {
   
   SG.utils.css( node, "font-size", "200px" );
   equal( SG.utils.css( node, "font-size" ), "200px" );
-  
+
   SG.utils.css( node, "display", "block" );
   SG.utils.css( node, "width", "700px" );
   equal( SG.utils.css( node, "display" ), "block" );
@@ -584,6 +593,13 @@ test("attr", function() {
   equal( SG.utils.attr( node1, "title" ), "foo" );
   equal( SG.utils.attr( node2, "href" ), "foobar.html" );
   equal( SG.utils.attr( node3, "border" ), "200" );
+  
+  SG.utils.attr( node1, "title", "bar" );
+  equal( SG.utils.attr( node1, "title" ), "bar" );
+  SG.utils.attr( node2, "href", "baz.html" );
+  equal( SG.utils.attr( node2, "href" ), "baz.html" );
+  SG.utils.attr( node3, "border", "123" );
+  equal( SG.utils.attr( node3, "border" ), "123" );
 });
 
 

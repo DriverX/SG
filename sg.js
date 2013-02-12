@@ -247,6 +247,19 @@ var SGUtils = {
     }
     return ret;
   },
+
+
+  /**
+   *
+   */
+  camelCase: function( str ) {
+    var ret;
+    str = String( str );
+    ret = str.replace(/[\s\-_]+([\w\d])/g, function(f, $1) {
+      return $1.toUpperCase();
+    });
+    return ret;
+  },
   
   
   /**
@@ -594,13 +607,17 @@ var SGUtils = {
    */
   css: function ( elem, cssProp, value ) {
     if( !elem ) {
-      return null;
+      return;
     }
-    var ret = null;
-    if( arguments.length > 2 && cssProp ) {
-      elem.style[ cssProp ] = value;
-    } else if( cssProp ) {
-      ret = curCSS( elem, cssProp );
+
+    var ret;
+    if( cssProp ) {
+      cssProp = SGUtils.camelCase( cssProp );
+      if( arguments.length > 2 ) {
+        elem.style[ cssProp ] = value;
+      } else {
+        ret = curCSS( elem, cssProp );
+      }
     }
     return ret;
   },
