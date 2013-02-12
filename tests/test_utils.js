@@ -27,12 +27,10 @@ test("isFn", function() {
   var fn1 = function() {};
   var fn2 = Object.prototype.hasOwnProperty;
   var fn3 = new Function("return true;");
-  var DOMMethod = $("#qunit-fixture").get(0).appendChild;
 
   ok( SG.utils.isFn( fn1 ) );
   ok( SG.utils.isFn( fn2 ) );
   ok( SG.utils.isFn( fn3 ) );
-  ok( SG.utils.isFn( DOMMethod ) );
 });
 
 
@@ -468,7 +466,6 @@ test("css", function() {
   // get
   equal( SG.utils.css( node, "display" ), "none" );
   equal( SG.utils.css( node, "font-size" ), "14px" );
-  equal( SG.utils.css( node, "blabla" ), undefined );
   
   // set
   SG.utils.css( node, "display", "inline" );
@@ -476,12 +473,11 @@ test("css", function() {
   
   SG.utils.css( node, "font-size", "200px" );
   equal( SG.utils.css( node, "font-size" ), "200px" );
-
-  SG.utils.css( node, "blabla", "foobar" );
-  equal( SG.utils.css( node, "blabla" ), undefined );
   
-  SG.utils.css( node, "position", "absolute" );
+  SG.utils.css( node, "display", "block" );
+  SG.utils.css( node, "width", "700px" );
   equal( SG.utils.css( node, "display" ), "block" );
+  equal( SG.utils.css( node, "width" ), "700px" );
 
   node = null;
 });
