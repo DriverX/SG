@@ -755,7 +755,7 @@ var SGUtils = {
     }
 
     var ret;
-    if( attr in {"href": true, "src": true, "width": true, "height": true}) {
+    if( attr in {"href": true, "src": true, "width": true, "height": true} ) {
       ret = elem.getAttribute( attr, 2 );
     } else {
       ret = elem.getAttribute( attr );
@@ -2617,6 +2617,8 @@ var _ = function (selector, root ) {
     return sets;
   }
   
+
+  selector = utils.trim( selector );
 /* quick return or generic call, missed ~ in attributes selector */
   if( /^[\w#.][\w\]*^|=!]*$/.test( selector ) ) {
 /*
@@ -2820,7 +2822,7 @@ that must be nulled. Need this only to generic case
 sg.$ = utils.$ = function( mixed, context ) {
   return _( mixed, context )[ 0 ] || null;
 };
-sg.$$ = utils.$$ = _;
+sg.yass = sg.$$ = utils.$$ = _;
 
 })( window, SG );
 

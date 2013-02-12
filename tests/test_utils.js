@@ -588,7 +588,7 @@ test("empty", function() {
 test("attr", function() {
   var node1 = $("<span title='foo'/>").get(0),
     node2 = $("<a/>").appendTo("#qunit-fixture").attr("href", "foobar.html").get(0),
-    node3 = $("<img border=200/>").get(0);
+    node3 = $("<img border='200'/>").get(0);
 
   equal( SG.utils.attr( node1, "title" ), "foo" );
   

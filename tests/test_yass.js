@@ -2,7 +2,8 @@ module("SG.yass");
 
 
 test("#id", function() {
-  ok(false);
+  equal( SG.$$("#qunit-fixture").length, 1 );
+  equal( SG.$$(" #qunit-fixture ").length, 1 );
 });
 
 
