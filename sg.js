@@ -749,10 +749,21 @@ var SGUtils = {
    * @return {String|Void}
    */
   attr: function( elem, attr, value ) {
+    attr = attr.toLowerCase();
     if( arguments.length > 2 ) {
       elem.setAttribute( attr, value );
     }
-    return elem.getAttribute( attr );
+
+    var ret;
+    if( attr in {"href": true, "src": true, "width": true, "height": true}) {
+      ret = elem.getAttribute( attr, 2 );
+    } else {
+      ret = elem.getAttribute( attr );
+    }
+    if( ret === null ) {
+      ret = undefined;
+    }
+    return ret;
   },
   
   
@@ -2554,15 +2565,10 @@ window.SG = window.SG || Suggest;
 
 /**!
 * YASS 0.3.8 - The fastest CSS selectors JavaScript library
-* JSX 1.1 - Multi-events and components loading library
 *
 * Copyright (c) 2008-2009 Nikolay Matsievsky aka sunnybear (webo.in),
-* 2007 Andrew Sumin (jsx.ru)
 * Dual licensed under the MIT (MIT-LICENSE.txt)
 * and GPL (GPL-LICENSE.txt) licenses.
-*
-* $Date: 2009-05-04 12:26:33 +3000 (Mon, 04 May 2009) $
-* $Rev: 371 $
 */
 (function( window, sg ){
 
@@ -2600,9 +2606,8 @@ var _ = function (selector, root ) {
     return [ selector ];
   }
   
-  if(
-    typeof selector === "object" &&
-    ( Object.prototype.toString.call( selector ) === "[object Array]" || selector.length !== undefined )
+  if( typeof selector === "object" && ( utils.isArr( selector )
+      || selector.length !== undefined )
   )
   {
     return makeArray( selector );
@@ -2818,6 +2823,7 @@ sg.$ = utils.$ = function( mixed, context ) {
 sg.$$ = utils.$$ = _;
 
 })( window, SG );
+
 /**
  * Template Engine
  * based on Simple JavaScript Templating via John Resig - http://ejohn.org/
