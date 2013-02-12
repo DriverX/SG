@@ -362,7 +362,7 @@ test("prm", function() {
   );
   equal(
     SG.utils.prm({"foo": true, "bar": null, "baz": undefined}),
-    "foo=true&bar=null&baz=undefined"
+    "foo=true"
   );
   equal(
     SG.utils.prm(),

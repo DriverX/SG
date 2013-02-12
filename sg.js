@@ -520,12 +520,15 @@ var SGUtils = {
 
     for( key in obj ) {
       if( SGUtils.hasOwn( obj, key ) ) {
-        ret.push(
-          SGUtils.map(
-            [ key, SGUtils.isFn( value = obj[ key ] ) ? value() : value ],
-            urlEncode
-          ).join( "=" )
-        );
+        value = obj[ key ];
+        if( key && value != null ) {
+          ret.push(
+            SGUtils.map(
+              [ key, SGUtils.isFn( value ) ? value() : value ],
+              urlEncode
+            ).join( "=" )
+          );
+        }
       }
     }
     return ret.join( "&" );
