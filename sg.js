@@ -2620,7 +2620,7 @@ var _ = function (selector, root ) {
 
   selector = utils.trim( selector );
 /* quick return or generic call, missed ~ in attributes selector */
-  if( /^[\w#.][\w\]*^|=!]*$/.test( selector ) ) {
+  if( /^[\w#.][\w\-_]*$/.test( selector ) ) {
 /*
 some simple cases - only ID or only CLASS for the very first occurence
 - don't need additional checks. Switch works as a hash.
