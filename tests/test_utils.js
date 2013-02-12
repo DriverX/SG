@@ -530,23 +530,53 @@ test("addCls/rmCls/hasCls", function() {
 });
 
 
-test("cre", function() {
-  ok(false);
+test("cres", function() {
+  var nodes = SG.utils.cres("<span>1<b>2</b></span><span>3</span><div>4</div><br>");
+  equal( nodes.length, 4 );
 });
 
 
-test("cres", function() {
-  ok(false);
+test("cre", function() {
+  var node = SG.utils.cre(" input ");
+
+  equal( node.nodeName.toLowerCase(), "input" );
+
+  node = SG.utils.cre("<div></div>");
+  equal( node.nodeName.toLowerCase(), "div" );
 });
 
 
 test("rme", function() {
-  ok(false);
+  var cont = $("#qunit-fixture").get(0);
+  var node1 = document.createElement("div"),
+    node2 = document.createElement("span"),
+    node3 = document.createElement("a");
+  cont.appendChild( node1 );
+  cont.appendChild( node2 );
+  cont.appendChild( node3 );
+
+  equal( cont.getElementsByTagName("div").length, 1 );
+  SG.utils.rme( node1 );
+  equal( cont.getElementsByTagName("div").length, 0 );
+
+  equal( cont.getElementsByTagName("span").length, 1 );
+  SG.utils.rme( node2 );
+  equal( cont.getElementsByTagName("span").length, 0 );
+
+  equal( cont.getElementsByTagName("a").length, 1 );
+  SG.utils.rme( node3 );
+  equal( cont.getElementsByTagName("a").length, 0 );
 });
 
 
 test("empty", function() {
-  ok(false);
+  var $cont = $("#qunit-fixture");
+  
+  $cont.append("<a>1</a><span>2<b>3</b></span><i>4</i><div>5</div> some text<hr>");
+  equal( $cont.get(0).childNodes.length, 6 );
+
+  SG.utils.empty( $cont.get(0) );
+  equal( $cont.get(0).childNodes.length, 0 );
 });
 
 
