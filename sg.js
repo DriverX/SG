@@ -2,8 +2,7 @@
   
 var 
   document = window.document,
-  // deprecated isOpera = /opera/i.test( window.navigator.userAgent ) && !!window.opera,
-  
+
   // Props name
   str__proto = "prototype",
   str__constructor = "constructor",

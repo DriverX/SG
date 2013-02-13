@@ -8,6 +8,7 @@ module("SG.yass", {
     $cont.append("<div><i class='test2'></i></div><div class='test1'><span id='test1' class='test1'/><span/><a/><a class='test2 test1'/> text <i class='test2'/><div id='foo_bar-baz__123' class='foo_bar-baz__123'/></div><span id='foo_bar-baz__123'> <center/><center/><center/> </span>");
   },
   teardown: function() {
+    $cont.empty();
     $cont = null;
   }
 });
