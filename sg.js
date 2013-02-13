@@ -3079,6 +3079,10 @@ var Event = {
         var handlers = utils.from( handler ),
             appendMethod = firstHandler ? "unshift" : "push";
         utils.arrEach( event.split( rWhiteSpaces ), function( eventType ) {
+          if( !eventType ) {
+            return;
+          }
+
           utils.arrEach( handlers, function( handler ) {
             if( !handler || !utils.isFn( handler ) ) {
               return;
@@ -3098,7 +3102,7 @@ var Event = {
               };
             
             eventHandle.elem = elem;
-            
+           
             if( eventListeners[ appendMethod ]( handler ) == 1 && ( elem.nodeType || elem[ str__setInterval ] ) ) {
               var custom = Event.custom && Event.custom[ eventType ] && Event.custom[ eventType ].setup;
               if( !custom || custom.call( elem, eventHandle ) === false ) {
@@ -3147,6 +3151,10 @@ var Event = {
           elem = window;
         }
         utils.arrEach( event.split( rWhiteSpaces ), function( eventType ) {
+          if( !eventType ) {
+            return;
+          }
+
           var elemGuid = elem[ expando ],
             listeners = elemGuid && Event.c[ elemGuid ],
             eventListeners = listeners && listeners[ eventType ];
