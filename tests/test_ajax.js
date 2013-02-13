@@ -1,15 +1,8 @@
 module("SG.Ajax");
 
 
-test("JSONP", function() {
+test("TODO", function() {
   ok(false);
 });
-
-
-test("XHR", function() {
-  ok(false);
-});
-
-
 
 
