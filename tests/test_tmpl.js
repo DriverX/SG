@@ -59,7 +59,7 @@ test("cache string", function() {
 
 
 test("cache DOMNode", function() {
-  var node1 = $("<script type='plain/text'>test_nodecache1=<%= foo %></script>").get(0);
+  var node1 = $("<script type='plain/text'>test_nodecache1=<%= foo %></script>").appendTo( $cont ).get(0);
   SG.tmpl( node1 );
 
   ok( node1[ SG.expando ] in SG.tmpl.cch );
