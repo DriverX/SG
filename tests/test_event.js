@@ -1,4 +1,16 @@
-module("SG.Event");
+(function() {
+
+var $cont;
+
+module("SG.Event", {
+  setup: function() {
+    $cont = $("#qunit-fixture");
+  },
+  teardown: function() {
+    $cont.empty();
+    $cont = null;
+  }
+});
 
 
 test("add DOM event", function() {
@@ -34,4 +46,5 @@ test("trigger custom event", function() {
 
 
 
+})();
 
