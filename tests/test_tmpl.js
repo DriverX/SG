@@ -63,7 +63,7 @@ test("cache DOMNode", function() {
   SG.tmpl( node1 );
 
   ok( node1[ SG.expando ] in SG.tmpl.cch );
-  ok( node1.innerHTML in SG.tmpl.cch );
+  ok( SG.utils.trim(node1.innerHTML) in SG.tmpl.cch );
 });
 
 
