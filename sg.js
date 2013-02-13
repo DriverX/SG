@@ -21,6 +21,7 @@ var
   Array__map = Array[ str__proto ].map,
   String__trim = String[ str__proto ].trim,
   Function__bind = Function[ str__proto ].bind,
+  Object__keys = Object.keys,
   urlEncode = encodeURIComponent,
   urlDecode = decodeURIComponent,
   setTimeout = window[ str__setTimeout ],
@@ -307,7 +308,22 @@ var SGUtils = {
   each: function( obj, fn, context ) {
     SGUtils[ typeof obj.length === "number" ? "arrEach" : "objEach" ]( obj, fn, context );
   },
-  
+
+
+  /**
+   *
+   */
+  keys: Object__keys || function( obj ) {
+    var ret = [],
+      k;
+    for( k in obj ) {
+      if( SGUtils.hasOwn( obj, k ) ) {
+        ret.push( k );
+      }
+    }
+    return ret
+  },
+
   
   /**
    * Обходит каждый элемент массива и создает

@@ -18,8 +18,7 @@ module("SG.Event", {
 
 
 test("add/rm event", function() {
-  var i = 0,
-    click_handler = function() {},
+  var click_handler = function() {},
     click_handler2 = function() {},
     click_handler3 = function() {},
     mouseover_handler = function() {},
@@ -66,6 +65,8 @@ test("add/rm event", function() {
   equal( SG.utils.indexOf( a_handlers["click"], click_handler3 ), 0 );
   equal( SG.utils.indexOf( a_handlers["click"], click_handler ), 1 );
   equal( a_handlers["click"].length, 7 );
+  
+  equal( SG.utils.keys( a_handlers ).length, 3 );
 
 
   SG.Event.rm( a, "click", click_handler );
@@ -86,7 +87,8 @@ test("add/rm event", function() {
   SG.Event.rm( a );
   ok( a_handlers["click"] === undefined );
   ok( a_handlers["mousedown"] === undefined );
-
+  
+  equal( SG.utils.keys( a_handlers ).length, 0 );
 });
 
 
@@ -111,6 +113,7 @@ test("add/rm special events", function() {
   ok( a_handlers["mouseleave"] === undefined );
   ok( a_handlers["mouseout"] === undefined );
 
+  equal( SG.utils.keys( a_handlers ).length, 0 );
 });
 
 
