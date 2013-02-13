@@ -212,8 +212,20 @@ test("objEach", function() {
 });
 
 
+// TODO
 test("each", function() {
   ok(true);
+});
+
+
+test("keys", function() {
+  var obj1 = {"foo": 1, "bar": null, "baz": undefined, "qux": function(){}},
+    obj2 = {},
+    obj3 = {"hasOwnProperty": function() {}};
+  
+  equal( SG.utils.keys( obj1 ).length, 4 );
+  equal( SG.utils.keys( obj2 ).length, 0 );
+  equal( SG.utils.keys( obj3 ).length, 1 );
 });
 
 

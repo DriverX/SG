@@ -117,13 +117,68 @@ test("add/rm special events", function() {
 });
 
 
-test("trigger DOM event", function() {
-  ok(false);
+test("fire event", function() {
+  var calls = {};
+  function inc_call( evt ) {
+    calls[ evt ] = ( calls[ evt ] || 0 ) + 1;
+    return calls[ evt ];
+  }
+  function get_handler() {
+    return function( event ) {
+      inc_call( event.type );
+    };
+  }
+
+  SG.Event.add( a, "click", get_handler() );
+  SG.Event.add( a, "mouseenter", get_handler() );
+  SG.Event.add( a, "mouseleave", get_handler() );
+  SG.Event.add( a, "mousedown", get_handler() );
+  SG.Event.add( a, "blabla", get_handler() );
+  
+  SG.Event.fire( a, "click" );
+  equal( calls["click"], 1 );
+  
+  SG.Event.add( a, "click", get_handler() );
+  SG.Event.fire( a, "click" );
+  equal( calls["click"], 3 );
+  equal( SG.utils.keys( calls ).length, 1 );
+
+  SG.Event.fire( a, "mouseenter" );
+  equal( calls["mouseenter"], 1 );
+  equal( SG.utils.keys( calls ).length, 2 );
+  
+  SG.Event.fire( a, "mouseleave" );
+  equal( calls["mouseleave"], 1 );
+  equal( SG.utils.keys( calls ).length, 3 );
+
+  SG.Event.fire( a, "foobar" );
+  equal( SG.utils.keys( calls ).length, 3 );
+  
+  SG.Event.fire( a, "blabla" );
+  equal( SG.utils.keys( calls ).length, 4 );
+  
+  SG.Event.rm( a );
 });
 
 
-test("add custom event", function() {
-  ok(false);
+test("fire event order", function() {
+  var calls = [];
+
+  SG.Event.add( a, "click", function() {
+    calls.push("second");
+  });
+  SG.Event.first( a, "click", function() {
+    calls.push("first");
+  });
+  SG.Event.add( a, "click", function() {
+    calls.push("third");
+  });
+  
+  SG.Event.fire( a, "click" );
+  equal( calls.length, 3 );
+  equal( SG.utils.indexOf( calls, "first" ), 0 );
+  equal( SG.utils.indexOf( calls, "second" ), 1 );
+  equal( SG.utils.indexOf( calls, "third" ), 2 );
 });
 
 
