@@ -5,6 +5,8 @@ var $cont;
 module("SG.tmpl", {
   setup: function() {
     $cont = $("#qunit-fixture");
+    $("<script class='jstmpl' type='plain/text'>bar=<%= bar %></script>").appendTo( $cont );
+    $("<script id='jstmpl' type='plain/text'>passed=<%= is_passed %></script>").appendTo( $cont );
   },
   teardown: function() {
     $cont.empty();
@@ -41,22 +43,27 @@ test("create from DOMNode", function() {
 
 
 test("create from selector", function() {
-  ok(false);
+  var tmplfn1 = SG.tmpl(".jstmpl"),
+    tmplfn2 = SG.tmpl("#jstmpl");
+
+  equal( tmplfn1({"bar": "baz"}), "bar=baz" );
+  equal( tmplfn2({"is_passed": "true"}), "passed=true" );
 });
 
 
 test("cache string", function() {
-  ok(false);
+  SG.tmpl("test_cache1=<%= foo %>");
+
+  ok( "test_cache1=<%= foo %>" in SG.tmpl.cch );
 });
 
 
 test("cache DOMNode", function() {
-  ok(false);
-});
+  var node1 = $("<script type='plain/text'>test_nodecache1=<%= foo %></script>").get(0);
+  SG.tmpl( node1 );
 
-
-test("cache selector", function() {
-  ok(false);
+  ok( node1[ SG.expando ] in SG.tmpl.cch );
+  ok( node1.innerHTML in SG.tmpl.cch );
 });
 
 
