@@ -179,20 +179,58 @@ test("fire event order", function() {
   equal( SG.utils.indexOf( calls, "first" ), 0 );
   equal( SG.utils.indexOf( calls, "second" ), 1 );
   equal( SG.utils.indexOf( calls, "third" ), 2 );
+
+  SG.Event.rm( a );
 });
 
 
-test("remove custom event", function() {
-  ok(false);
+test("one event", function() {
+  var i = 0;
+  SG.Event.one( a, "click", function() {
+    i++;
+  });
+  SG.Event.fire( a, "click" );
+  equal( i, 1 );
+  
+  SG.Event.fire( a, "click" );
+  equal( i, 1 );
+  
+  SG.Event.rm( a );
 });
 
 
-test("trigger custom event", function() {
-  ok(false);
+test("event object", function() {
+  var
+    stable_props = [
+      "type", "timeStamp", "target", "currentTarget",
+      "isDefaultPrevented", "preventDefault", "stopPropagation", 
+      "stopImmediatePropagation", "isPropagationStopped",
+      "isImmediatePropagationStopped", SG.expando
+    ],
+    node_props = stable_props.concat([]),
+    evt_props = {
+      "click": node_props,
+      "mousedown": node_props,
+      "mouseenter": node_props,
+      "mouseleave": node_props,
+      "foobar": stable_props
+    };
+
+  SG.utils.objEach( evt_props, function( props, evt ) {
+    SG.Event.add( a, evt, function( event ) {
+      equal( event.type, evt );
+      SG.utils.arrEach( props, function( prop ) {
+        ok( prop in event, "find '" + prop + "' in event object" );
+      });
+    });
+  });
+
+  SG.utils.objEach( evt_props, function( props, evt ) {
+    SG.Event.fire( a, evt );
+  });
+
+  SG.Event.rm( a );
 });
-
-
-
 
 
 })();
