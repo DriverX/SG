@@ -92,7 +92,7 @@ test("add/rm event", function() {
 });
 
 
-test("add/rm special events", function() {
+test("add/rm custom events", function() {
   var special_handler = function() {};
 
   SG.Event.add( a, "mouseenter mouseleave", special_handler );
@@ -112,8 +112,30 @@ test("add/rm special events", function() {
   SG.Event.rm( a, "mouseleave" );
   ok( a_handlers["mouseleave"] === undefined );
   ok( a_handlers["mouseout"] === undefined );
-
+  
   equal( SG.utils.keys( a_handlers ).length, 0 );
+
+
+  SG.Event.rm( a, "click" );
+  SG.Event.custom["click"] = {
+    setup: function() {},
+    teardown: function() {}
+  };
+  SG.Event.add( a, "click", function() {});
+  location.hash = "";
+  SG.Event.fire( a, "click" );
+  equal( location.hash, "#test" );
+  SG.Event.rm( a, "click" );
+
+  SG.Event.custom["click"] = {
+    setup: function() {return false;},
+    teardown: function() {return false;}
+  };
+  SG.Event.add( a, "click", function() {});
+  location.hash = "";
+  SG.Event.fire( a, "click" );
+  equal( location.hash, "#test" );
+  SG.Event.rm( a, "click" );
 });
 
 
@@ -134,9 +156,11 @@ test("fire event", function() {
   SG.Event.add( a, "mouseleave", get_handler() );
   SG.Event.add( a, "mousedown", get_handler() );
   SG.Event.add( a, "blabla", get_handler() );
-  
+ 
+  location.hash = "";
   SG.Event.fire( a, "click" );
   equal( calls["click"], 1 );
+  equal( location.hash, "#test" );
   
   SG.Event.add( a, "click", get_handler() );
   SG.Event.fire( a, "click" );
@@ -181,6 +205,42 @@ test("fire event order", function() {
   equal( SG.utils.indexOf( calls, "third" ), 2 );
 
   SG.Event.rm( a );
+
+  SG.Event.add( a, "click", function( event ) {
+    ok( !event.isDefaultPrevented() );
+    ok( !event.isPropagationStopped() );
+    ok( !event.isImmediatePropagationStopped() );
+  });
+  SG.Event.add( a, "click", function() {
+    return false;
+  });
+  SG.Event.add( a, "click", function( event ) {
+    ok( event.isDefaultPrevented() );
+    ok( event.isPropagationStopped() );
+    ok( !event.isImmediatePropagationStopped() );
+  });
+  SG.Event.fire( a, "click" );
+  SG.Event.rm( a );
+
+
+  SG.Event.add( a, "click", function( event ) {
+    event.preventDefault();
+    ok( event.isDefaultPrevented() );
+  });
+  SG.Event.add( a, "click", function( event ) {
+    ok( event.isDefaultPrevented() );
+    event.stopPropagation();
+    ok( event.isPropagationStopped() );
+  });
+  SG.Event.add( a, "click", function( event ) {
+    event.stopImmediatePropagation();
+    ok( event.isImmediatePropagationStopped() );
+  });
+  SG.Event.add( a, "click", function() {
+    ok( false, "it's never call" );
+  })
+  SG.Event.fire( a, "click" );
+  SG.Event.rm( a );
 });
 
 
@@ -218,6 +278,9 @@ test("event object", function() {
 
   SG.utils.objEach( evt_props, function( props, evt ) {
     SG.Event.add( a, evt, function( event ) {
+      equal( this, a );
+      equal( event.target, a );
+      equal( event.currentTarget, a );
       equal( event.type, evt );
       SG.utils.arrEach( props, function( prop ) {
         ok( prop in event, "find '" + prop + "' in event object" );
