@@ -34,14 +34,12 @@ test("isFn", function() {
 });
 
 
-if( typeof window !== "undefined" ) {
-  test("isWin", function() {
-    var obj = {setTimeout: function() {}};
-    
-    ok( !SG.utils.isWin( obj ) );
-    ok( SG.utils.isWin( window ) );
-  });
-}
+test("isWin", function() {
+  var obj = {setTimeout: function() {}};
+  
+  ok( !SG.utils.isWin( obj ) );
+  ok( SG.utils.isWin( window ) );
+});
 
 
 test("isObj", function() {
@@ -59,9 +57,7 @@ test("isObj", function() {
   ok( !SG.utils.isObj( obj ) );
   ok( !SG.utils.isObj( fakeDOM ) );
   
-  if( typeof window !== "undefined" ) {
-    ok( !SG.utils.isObj( window ) );
-  }
+  ok( !SG.utils.isObj( window ) );
 
   if( Object.create ) {
     ok(SG.utils.isObj( Object.create( null ) ) );
