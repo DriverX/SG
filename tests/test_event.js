@@ -115,27 +115,30 @@ test("add/rm custom events", function() {
   
   equal( SG.utils.keys( a_handlers ).length, 0 );
 
-
-  SG.Event.rm( a, "click" );
-  SG.Event.custom["click"] = {
-    setup: function() {},
-    teardown: function() {}
-  };
-  SG.Event.add( a, "click", function() {});
-  location.hash = "";
-  SG.Event.fire( a, "click" );
-  equal( location.hash, "#test" );
   SG.Event.rm( a, "click" );
 
+  var
+    setup_calls = 0,
+    teardown_calls = 0;
   SG.Event.custom["click"] = {
-    setup: function() {return false;},
-    teardown: function() {return false;}
+    setup: function() {
+      setup_calls++;
+    },
+    teardown: function() {
+      teardown_calls++;
+    }
   };
-  SG.Event.add( a, "click", function() {});
-  location.hash = "";
-  SG.Event.fire( a, "click" );
-  equal( location.hash, "#test" );
-  SG.Event.rm( a, "click" );
+  var
+    fn1 = function() {},
+    fn2 = function() {};
+  SG.Event.add( a, "click", fn1 ); 
+  SG.Event.add( a, "click", fn2 ); 
+  SG.Event.rm( a, "click", fn1 );
+  SG.Event.rm( a, "click", fn2 );
+  equal( setup_calls, 1 );
+  equal( teardown_calls, 1 );
+
+  delete SG.Event.custom["click"];
 });
 
 
@@ -157,10 +160,10 @@ test("fire event", function() {
   SG.Event.add( a, "mousedown", get_handler() );
   SG.Event.add( a, "blabla", get_handler() );
  
-  location.hash = "";
+  // location.hash = "";
   SG.Event.fire( a, "click" );
   equal( calls["click"], 1 );
-  equal( location.hash, "#test" );
+  // equal( location.hash, "#test" );
   
   SG.Event.add( a, "click", get_handler() );
   SG.Event.fire( a, "click" );
@@ -270,9 +273,7 @@ test("event object", function() {
     node_props = stable_props.concat([]),
     evt_props = {
       "click": node_props,
-      "mousedown": node_props,
       "mouseenter": node_props,
-      "mouseleave": node_props,
       "foobar": stable_props
     };
 

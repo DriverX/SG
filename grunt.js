@@ -22,9 +22,10 @@ module.exports = function(grunt) {
 				src: [
           "lib/sg.core.js",
           "lib/sg.yass.js",
-          "lib/sg.tmpl.js",
+          "lib/sg.when.js",
           "lib/sg.event.js",
-          "lib/sg.ajax.js"
+          "lib/sg.ajax2.js",
+          "lib/sg.tmpl.js"
         ],
 				dest: "<%= files.name %>.js"
 			},
