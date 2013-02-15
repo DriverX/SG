@@ -4,14 +4,24 @@
 module("SG.Ajax");
 
 
-test("TODO", function() {
-  
-  ok( SG.Ajax( "", {} ) instanceof SG.Ajax );
+asyncTest("basic", function() {
+  expect( 2 );
 
-  var ajax = SG.Ajax("test_ajax.js");
-  ajax.send();
-
-  ok(false);
+  SG.Ajax("data/test_ajax_simple.html", {
+    success: function( event, response ) {
+      equal( response, "<!-- passed -->\n" );
+      start(); 
+    }
+  }).send();
+ 
+  stop();
+  SG.Ajax("data/test_ajax_simple.html", {
+    method: "post",
+    success: function( event, response ) {
+      equal( response, "<!-- passed -->\n" );
+      start(); 
+    }
+  }).send();
 });
 
 

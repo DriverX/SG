@@ -1,0 +1,4 @@
+jsonp_callback({
+    "foo": "bar"
+});
+
