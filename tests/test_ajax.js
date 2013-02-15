@@ -15,7 +15,6 @@ asyncTest("1. basic", function() {
     }
   });
   ajax.send();
-  console.log( ajax );
  
   n++;
   stop();
