@@ -2575,6 +2575,7 @@ Suggest.setup = function( options ) {
 Suggest.expando = EXPANDO;
 Suggest.guid = getGUID;
 Suggest.now = now;
+Suggest.noop = emptyFn;
 Suggest.utils = SGUtils;
 
 // Расшариваем в window
@@ -4329,7 +4330,7 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     }
 
     if( isAborted || xhrReadyState == 4 ) {
-      xhr.onreadystatechange = null;
+      xhr.onreadystatechange = sg.noop;
       
       clearTimeout( self._tmid );
       
@@ -4427,7 +4428,7 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     if ( !options.crossDomain && !reqHeaders["X-Requested-With"] ) {
       reqHeaders["X-Requested-With"] = "XMLHttpRequest";
     }
-    
+
     try {
       for( k in reqHeaders ) {
         xhr.setRequestHeader( k, reqHeaders[ k ] );
@@ -4438,7 +4439,9 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     var xhrFields = options.xhrFields;
     if ( xhrFields ) {
       for( k in xhrFields ) {
-        xhr[ k ] = xhrFields[ k ];
+        try {
+          xhr[ k ] = xhrFields[ k ];
+        } catch( e ) {}
       }
     }
     
@@ -4451,7 +4454,7 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     
     // mark as processing
     self._processing = true;
-
+    
     // make request
     return xhr.send( method === "POST" ? urlArgs : null );    
   },

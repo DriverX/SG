@@ -5,7 +5,7 @@ module("SG.Ajax");
 
 
 asyncTest("basic", function() {
-  expect( 1 );
+  expect( 2 );
 
   SG.Ajax("data/test_ajax_simple.html", {
     success: function( event, response ) {
