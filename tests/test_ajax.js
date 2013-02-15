@@ -15,6 +15,7 @@ asyncTest("1. basic", function() {
     }
   });
   ajax.send();
+  console.log( ajax );
  
   n++;
   stop();
@@ -53,29 +54,29 @@ asyncTest("1. basic", function() {
     }
   }).send();
   
-  // n += 1;
-  // stop();
-  // SG.Ajax("data/test_ajax_jsonp.json", {
-  //   dataType: "jsonp",
-  //   success: function( event, response ) {
-  //     deepEqual( response, {"foo": "bar"} );
-  //     start(); 
-  //   },
-  //   jsonpCallback: "jsonp_callback_1"
-  // }).send();
-  // 
-  // n += 1;
-  // stop();
-  // SG.Ajax("data/test_ajax_jsonp2.json", {
-  //   dataType: "jsonp",
-  //   success: function( event, response ) {
-  //     deepEqual( response, {"baz": "qux"} );
-  //     start(); 
-  //   },
-  //   jsonpCallback: function() {
-  //     return "jsonp_callback_2";              
-  //   }
-  // }).send();
+  n += 1;
+  stop();
+  SG.Ajax("data/test_ajax_jsonp.json", {
+    dataType: "jsonp",
+    success: function( event, response ) {
+      deepEqual( response, {"foo": "bar"} );
+      start(); 
+    },
+    jsonpCallback: "jsonp_callback_1"
+  }).send();
+  
+  n += 1;
+  stop();
+  SG.Ajax("data/test_ajax_jsonp2.json", {
+    dataType: "jsonp",
+    success: function( event, response ) {
+      deepEqual( response, {"baz": "qux"} );
+      start(); 
+    },
+    jsonpCallback: function() {
+      return "jsonp_callback_2";              
+    }
+  }).send();
   
   expect( n );
 });
