@@ -41,9 +41,14 @@ asyncTest("1. basic", function() {
   SG.Ajax("data/test_ajax_xml.xml", {
     dataType: "xml",
     success: function( event, response ) {
-      equal( response.getElementsByTagName( "foo" ).length, 1 );
-      equal( response.firstChild.firstChild.nodeName, "foo" );
-      equal( response.firstChild.firstChild.textContent, "bar" );
+      var root = response.getElementsByTagName( "root" );
+      equal( root.length, 1 );
+      root = root[ 0 ];
+      
+      var foo = root.getElementsByTagName( "foo" );
+      equal( foo.length, 1 );
+      foo = foo[ 0 ];
+      equal( foo.textContent || foo.text, "bar" );
       start(); 
     }
   }).send();
