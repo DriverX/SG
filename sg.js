@@ -4355,7 +4355,6 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
       defer = self._defer;
     
     if( xhr ) {
-      alert( "abort call" );
       xhr.abort();
     }
     
