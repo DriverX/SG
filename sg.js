@@ -4209,15 +4209,15 @@ Ajax.prototype = {
   _ifResolve: function( response ) {
     var
       self = this;
-    
-    console.log( "resolve", response );
+
+    // console.log( "resolve", response );
     self.fire( "success", [ response ] );
   },
   _ifReject: function( reason ) {
     var
       self = this;
     
-    console.log( "reject", reason );
+    // console.log( "reject", reason );
     self.fire( "error", [ reason ] );
   },
 
@@ -4307,8 +4307,8 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
       xhrResponseText,
       response;
 
-    if( !isAborted ) {
-      xhrReadyState = xhr.readyState;
+    xhrReadyState = xhr.readyState;
+    if( !isAborted && xhrReadyState == 4 ) {
       xhrStatus = xhr.status;
       
       try {
@@ -4355,6 +4355,7 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
       defer = self._defer;
     
     if( xhr ) {
+      alert( "abort call" );
       xhr.abort();
     }
     
@@ -4378,17 +4379,19 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
   },
   
   send: function() {
-    var self = this;
-    if( self._processing ) {
-      throw Error("already processing");
-    }
-    
-    var options = self._options,
+    var
+      self = this,
+      options = self._options,
       xhr,
       method,
       url,
       urlQSStart,
-      urlArgs = "";
+      urlArgs = "",
+      k;
+
+    if( self._processing ) {
+      throw Error("already processing");
+    }
       
     xhr = self._getXHR();
     if( !xhr ) {
@@ -4421,19 +4424,23 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
       self.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 1970 00:00:00 GMT");
     }
     
-    if ( !options.crossDomain && !self._reqHeaders["X-Requested-With"] ) {
-      self._reqHeaders["X-Requested-With"] = "XMLHttpRequest";
+    var reqHeaders = self._reqHeaders;
+    if ( !options.crossDomain && !reqHeaders["X-Requested-With"] ) {
+      reqHeaders["X-Requested-With"] = "XMLHttpRequest";
     }
     
-    utils.objEach( self._reqHeaders, function( v, k ) {
-      xhr.setRequestHeader( k, v );
-    });
+    try {
+      for( k in reqHeaders ) {
+        xhr.setRequestHeader( k, reqHeaders[ k ] );
+      };
+    } catch( e ) {}
     
     // set additionals xhr props
-    if ( options.xhrFields ) {
-      utils.objEach( options.xhrFields, function( v, k ) {
-        xhr[ k ] = v;
-      });
+    var xhrFields = options.xhrFields;
+    if ( xhrFields ) {
+      for( k in xhrFields ) {
+        xhr[ k ] = xhrFields[ k ];
+      }
     }
     
     // set timeout
