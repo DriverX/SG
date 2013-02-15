@@ -4146,13 +4146,17 @@ function Ajax( url, options ) {
 }
 
 Ajax.prototype = {
+  _state: 0,
+
   // public props
   readyState: 0,
   status: -1,
   statusText: "",
   responseText: null,
   responseXML: null,
-  elapsed_time: 0,
+  startTime: 0,
+  endTime: 0,
+  elapsedTime: 0,
 
   _init: function( url, options ) {
     var
@@ -4178,8 +4182,8 @@ Ajax.prototype = {
     }
     options.dataType = options.dataType.toLowerCase();
 
-    self._url = url;
-    self._options = options;
+    self.url = url;
+    self.options = options;
 
     // init callbacks bindings from options
     var cb_names = ["success", "complete", "error"];
@@ -4191,12 +4195,15 @@ Ajax.prototype = {
     });
    
     // deffered object for transport module
-    var defer = when.defer();
-    self._defer = defer;
-    defer.promise.then(
-      bind( self._ifResolve, self ),
-      bind( self._ifReject, self )
+    var defer = when.defer(),
+        promise = defer.promise;
+    promise.always( bind( self._pAlwaysBefore, self ) );
+    promise.then(
+      bind( self._pResolve, self ),
+      bind( self._pReject, self )
     );
+    promise.always( bind( self._pAlwaysAfter, self ) );
+    self._defer = defer;
 
     // initialize transport module via dataType
     var transportModule;
@@ -4207,24 +4214,82 @@ Ajax.prototype = {
     }
     self._module = new transportModule( self );
   },
-  
-  _ifResolve: function( response ) {
+  _dataTypes: {
+    json: utils.parseJSON,
+    xml: utils.parseXML,
+    jsonp: true,
+  },
+  _handleResponse: function( response ) {
+    var
+      self = this,
+      options = self.options,
+      dataType = options.dataType,
+      data,
+      convertor;
+    
+    convertor = self._dataTypes[ dataType ];
+    if( !convertor ) {
+      data = String( response );
+    } else if( convertor === true ) {
+      data = response;
+    } else {
+      data = convertor( response );
+    }
+    return data;
+  },
+  _pAlwaysBefore: function( data ) {
+    var
+      self = this,
+      status = data[ 0 ],
+      statusText = data[ 1 ];
+    
+    self._state = 2;
+    self.status = status;
+    self.statusText = statusText;
+    self.readyState = status > 0 && status < 600 ? 4 : 0;
+  },
+  _pAlwaysAfter: function( data ) {
     var
       self = this;
 
-    // console.log( "resolve", response );
-    self.fire( "success", [ response ] );
+    self.fire( "complete", [ self.statusText ] );
   },
-  _ifReject: function( reason ) {
+  _pResolve: function( data ) {
+    var
+      self = this,
+      responses = data[ 2 ],
+      response;
+
+    self.responseText = responses.text,
+    self.responseXml = responses.xml;
+    
+    response = self._handleResponse( responses.text );
+
+    self.fire( "success", [ response, self.statusText ] );
+  },
+  _pReject: function( data ) {
     var
       self = this;
     
-    // console.log( "reject", reason );
-    self.fire( "error", [ reason ] );
+    self.fire( "error", [ self.statusText, data[ 2 ] ] );
   },
 
   // public methods
-  send: getProxyMethod( "send" ),
+  send: function() {
+    var
+      self = this;
+    
+    // set starting time
+    self.startTime = sg.now();
+
+    // make request
+    self._module.send();
+
+    if( self._state < 2 ) {
+      self._state = 1;
+      self.readyState = 1;
+    }
+  },
   abort: getProxyMethod( "abort" ),
   destroy: getProxyMethod( "destroy" ),
   setRequestHeader: getProxyMethod( "setRequestHeader" ),
@@ -4245,8 +4310,8 @@ Ajax.modules._Base = function( wrapper ) {
   var self = this;
 
   self._wrap = wrapper;
-  self._url = wrapper._url;
-  self._options = wrapper._options;
+  self._url = wrapper.url;
+  self._options = wrapper.options;
   self._defer = wrapper._defer;
 };
 Ajax.modules._Base.prototype = {
@@ -4273,28 +4338,8 @@ Ajax.modules.XHR = function( wrapper ) {
 };
 
 Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
-  _dataTypes: {
-    json: utils.parseJSON,
-    xml: utils.parseXML
-  },
   _getXHR: function() {
     return getSimpleXHR();
-  },
-  _handleResponse: function( response ) {
-    var
-      self = this,
-      options = self._options,
-      dataType = options.dataType,
-      data,
-      convertor;
-      
-    convertor = self._dataTypes[ dataType ];
-    if( convertor ) {
-      data = convertor( response );
-    } else {
-      data = String( response );
-    }
-    return data;
   },
   _onreadystatechange: function() {
     var
@@ -4307,7 +4352,8 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
       xhrReadyState,
       xhrResponseXml,
       xhrResponseText,
-      response;
+      statusText,
+      responses = {};
 
     xhrReadyState = xhr.readyState;
     if( !isAborted && xhrReadyState == 4 ) {
@@ -4322,7 +4368,7 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
       if( xhrReadyState == 4 ) {
         var xml = xhr.responseXML;
         if ( xml && xml.documentElement ) {
-          xhrResponseXML = xml;
+          xhrResponseXml = xml;
         }
         try {
           xhrResponseText = xhr.responseText;
@@ -4333,42 +4379,53 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     if( isAborted || xhrReadyState == 4 ) {
       xhr.onreadystatechange = sg.noop;
       
-      clearTimeout( self._tmid );
+      if( self._tmid ) {
+        clearTimeout( self._tmid );
+      }
       
       if( !isAborted ) {
         self._processing = false;
         self._completed = true;
         
+        if( !xhrStatus && !options.crossDomain ) {
+          xhrStatus = xhrResponsesText ? 200 : 404;
+        } else if( xhrStatus === 1223 ) {
+          xhrStatus = 204;
+        }
+        
+        statusText = STATUSES[ xhrStatus ] || xhrStatusText;
+        
         if( xhrStatus >= 200 && xhrStatus < 300 || xhrStatus === 304 ) {
-          response = self._handleResponse( xhrResponseText );
-          defer.resolve( response );
+          if( xhrResponseText ) {
+            responses.text = xhrResponseText;
+          }
+          if( xhrResponseXml ) {
+            responses.xml = xhrResponseXml;
+          }
+
+          defer.resolve( [ xhrStatus, statusText, responses ] );
         } else {
-          defer.reject( Ajax.BAD_STATUS );
+          defer.reject( [ xhrStatus, statusText, "" ] );
         }
         
         self._cleanup();
       }
     }
   },
-  _abort: function( abortStatus ) {
+  _abort: function( status ) {
     var self = this,
       xhr = self._xhr,
-      textStatus = STATUSES[ abortStatus ],
+      statusText = STATUSES[ status ],
       defer = self._defer;
     
-    if( xhr ) {
-      xhr.abort();
-    }
+    xhr.abort();
     
     self._aborted = true;
     self._processing = false;
     self._completed = true;
     self._onreadystatechange();
     
-    // TODO self._wrap.readyState
-    self.readyState = 4;
-    
-    defer.reject( abortStatus );
+    defer.reject( [ status, statusText, "" ] );
     
     self._cleanup();
   },
@@ -4383,6 +4440,7 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     var
       self = this,
       options = self._options,
+      defer = self._defer,
       xhr,
       method,
       url,
@@ -4457,12 +4515,16 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
     self._processing = true;
     
     // make request
-    return xhr.send( method === "POST" ? urlArgs : null );    
+    try {
+      xhr.send( method === "POST" ? urlArgs : null );
+    } catch( e ) {
+      defer.reject( [ Ajax.SEND_ERROR, STATUSES[ Ajax.SEND_ERROR ], e ] );
+    }
   },
   abort: function() {
     var self = this;
     if( !self._completed ) {
-      self._abort( Ajax.ABORT_USER );
+      self._abort( Ajax.CANCELED );
     }
   },
   setRequestHeader: function( name, value ) {
@@ -4490,7 +4552,8 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
 
 
 // statuses
-var stid = 1,
+var
+  stid = 600,
   cds = {},
   STATUSES = {};
 function addStatus( name, code, text ) {
@@ -4498,11 +4561,13 @@ function addStatus( name, code, text ) {
   Ajax[ name ] = code;
   STATUSES[ code ] = text;
 }
-addStatus("ABORT_USER", stid++, "aborted" );
+addStatus("OK", 200, "success" );
+addStatus("NOT_MODIFIED", 304, "notmodified" );
+addStatus("CANCELED", stid++, "canceled" );
 addStatus("ABORT_TIMEOUT", stid++, "timeout" );
 addStatus("BAD_STATUS", stid++, "bad status" );
-addStatus("SUCCESS", stid++, "OK" );
 addStatus("SYSTEM_ABORT", stid++, "system aborted" );
+addStatus("SEND_ERROR", stid++, "send error" );
 Ajax.STATUSES = STATUSES;
 
 

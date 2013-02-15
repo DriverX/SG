@@ -8,12 +8,13 @@ asyncTest("1. basic", function() {
   var n = 0;
 
   n++;
-  SG.Ajax("data/test_ajax_simple.html", {
+  var ajax = SG.Ajax("data/test_ajax_simple.html", {
     success: function( event, response ) {
       equal( response, "<!-- passed -->\n" );
       start(); 
     }
-  }).send();
+  });
+  ajax.send();
  
   n++;
   stop();
