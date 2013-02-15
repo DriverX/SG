@@ -4,9 +4,10 @@
 module("SG.Ajax");
 
 
-asyncTest("basic", function() {
-  expect( 2 );
+asyncTest("1. basic", function() {
+  var n = 0;
 
+  n++;
   SG.Ajax("data/test_ajax_simple.html", {
     success: function( event, response ) {
       equal( response, "<!-- passed -->\n" );
@@ -14,6 +15,7 @@ asyncTest("basic", function() {
     }
   }).send();
  
+  n++;
   stop();
   SG.Ajax("data/test_ajax_simple.html", {
     method: "post",
@@ -22,6 +24,54 @@ asyncTest("basic", function() {
       start(); 
     }
   }).send();
+  
+  n++;
+  stop();
+  SG.Ajax("data/test_ajax_json.json", {
+    dataType: "json",
+    success: function( event, response ) {
+      deepEqual( response, {"foo": "bar"} );
+      start(); 
+    }
+  }).send();
+  
+  n += 3;
+  stop();
+  SG.Ajax("data/test_ajax_xml.xml", {
+    dataType: "xml",
+    success: function( event, response ) {
+      equal( response.getElementsByTagName( "foo" ).length, 1 );
+      equal( response.firstChild.firstChild.nodeName, "foo" );
+      equal( response.firstChild.firstChild.textContent, "bar" );
+      start(); 
+    }
+  }).send();
+  
+  // n += 1;
+  // stop();
+  // SG.Ajax("data/test_ajax_jsonp.json", {
+  //   dataType: "jsonp",
+  //   success: function( event, response ) {
+  //     deepEqual( response, {"foo": "bar"} );
+  //     start(); 
+  //   },
+  //   jsonpCallback: "jsonp_callback_1"
+  // }).send();
+  // 
+  // n += 1;
+  // stop();
+  // SG.Ajax("data/test_ajax_jsonp2.json", {
+  //   dataType: "jsonp",
+  //   success: function( event, response ) {
+  //     deepEqual( response, {"baz": "qux"} );
+  //     start(); 
+  //   },
+  //   jsonpCallback: function() {
+  //     return "jsonp_callback_2";              
+  //   }
+  // }).send();
+  
+  expect( n );
 });
 
 

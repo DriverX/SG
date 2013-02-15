@@ -1,0 +1,4 @@
+window[ "jsonp_callback_2" ]({
+    "baz": "qux"
+});
+

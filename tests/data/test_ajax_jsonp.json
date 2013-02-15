@@ -1,4 +1,4 @@
-jsonp_callback({
+window[ "jsonp_callback_1" ]({
     "foo": "bar"
 });
 
