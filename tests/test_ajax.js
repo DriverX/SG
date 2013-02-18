@@ -4,7 +4,7 @@
 module("SG.Ajax");
 
 
-asyncTest("1. basic", function() {
+asyncTest("basic", function() {
   var n = 0;
 
   n++;
@@ -76,8 +76,22 @@ asyncTest("1. basic", function() {
       return "jsonp_callback_2";              
     }
   }).send();
+
+  n += 1;
+  stop();
+  SG.Ajax("data/test_ajax_notfound.xml", {
+    error: function() {
+      ok(true);
+      start();
+    }
+  }).send();
   
   expect( n );
+});
+
+
+test("statuses", function() {
+  ok(true);
 });
 
 

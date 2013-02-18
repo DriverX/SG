@@ -4072,7 +4072,7 @@ utils.Event = Event; // deprecated
 })( window, SG );
 
 
-(function( window, sg ) {
+(function( window, sg, undefined ) {
 
 var
   document = window.document,
@@ -4124,7 +4124,7 @@ function getProxyMethod( name ) {
     var
       self = this,
       ret,
-      module = self._module,
+      module = self._transport,
       module_method = module[ name ];
 
     if( arguments.length ) {
@@ -4146,6 +4146,7 @@ function Ajax( url, options ) {
 }
 
 Ajax.prototype = {
+  // private
   _state: 0,
 
   // public props
@@ -4208,11 +4209,11 @@ Ajax.prototype = {
     // initialize transport module via dataType
     var transportModule;
     if( options.dataType === "jsonp" ) {
-      transportModule = Ajax.modules.JSONP;
+      transportModule = transports.JSONP;
     } else {
-      transportModule = Ajax.modules.XHR; 
+      transportModule = transports.XHR; 
     }
-    self._module = new transportModule( self );
+    self._transport = new transportModule( self );
   },
   _dataTypes: {
     json: utils.parseJSON,
@@ -4289,7 +4290,7 @@ Ajax.prototype = {
     self.startTime = sg.now();
 
     // make request
-    self._module.send();
+    self._transport.send();
 
     if( self._state < 2 ) {
       self._state = 1;
@@ -4308,19 +4309,21 @@ extend( Ajax.prototype, Event.protoMixin );
 
 
 // transports storage
-Ajax.modules = {};
+var transports = {}
+Ajax.transports = transports;
 
 
 // Base class for transport modules
-Ajax.modules._Base = function( wrapper ) {
+function BaseTransport( wrapper ) {
   var self = this;
 
   self._wrap = wrapper;
   self._url = wrapper.url;
   self._options = wrapper.options;
   self._defer = wrapper._defer;
-};
-Ajax.modules._Base.prototype = {
+}
+
+BaseTransport.prototype = {
   send: function() {},
   abort: function() {},
   destroy: function() {},
@@ -4329,11 +4332,13 @@ Ajax.modules._Base.prototype = {
   getResponseHeader: function( name ) {}
 };
 
+transports._Base = BaseTransport;
+
 
 // XmlHttpRequest transport
-Ajax.modules.XHR = function( wrapper ) {
+function XHRTransport( wrapper ) {
   var self = this;
-  Ajax.modules._Base.call( self, wrapper );
+  BaseTransport.call( self, wrapper );
 
   self._xhr = null;
   self._processing = false;
@@ -4341,9 +4346,9 @@ Ajax.modules.XHR = function( wrapper ) {
   self._aborted = false;
   self._tmid = null;
   self._reqHeaders = {};
-};
+}
 
-Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
+XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
   _getXHR: function() {
     return getSimpleXHR();
   },
@@ -4545,11 +4550,13 @@ Ajax.modules.XHR.prototype = extend( {}, Ajax.modules._Base.prototype, {
   }
 });
 
+transports.XHR = XHRTransport;
+
 
 // jsonp transport
-Ajax.modules.JSONP = function( wrapper ) {
+function JSONPTransport( wrapper ) {
   var self = this;
-  Ajax.modules._Base.call( self, wrapper );
+  BaseTransport.call( self, wrapper );
   
   self._script = null;
   self._jsonpCallback = null;
@@ -4557,8 +4564,9 @@ Ajax.modules.JSONP = function( wrapper ) {
   self._completed = false;
   self._aborted = false;
   self._tmid = null;
-};
-Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
+}
+
+JSONPTransport.prototype = extend( {}, BaseTransport.prototype, {
   _onload: function() {
     var self = this,
       node = self._script,
@@ -4603,9 +4611,12 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
     window[ self._jsonpCallback ] = bind( self._glCb, self );
   },
   _rmGlCb: function() {
+    var cb_name = this._jsonpCallback;
     try {
-      delete window[ this._jsonpCallback ];
-    } catch( e ) {}
+      delete window[ cb_name ];
+    } catch( e ) {
+      window[ cb_name ] = undefined;
+    }
   },
   _replGlCb2Rm: function() {
     var self = this;
@@ -4633,6 +4644,12 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
     self._tmid = null;
   },
   
+  _getNodeToInsert: function() {
+    return ( document.head
+        || sg.$("head") || sg.$("body")
+        || document.documentElement );
+  },
+
   // public methods
   send: function() {
     var self = this;
@@ -4641,7 +4658,7 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
     }
     
     var options = self._options,
-      $head = document.head || sg.$("head,body") || document.documentElement,
+      $head = self._getNodeToInsert(),
       jsonpParam = options.jsonp,
       jsonpCallback = options.jsonpCallback,
       charset = options.scriptCharset,
@@ -4680,7 +4697,6 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
     // add props
     self._script = $script;
     self._jsonpCallback = jsonpCallback;
-    self._processing = true;
     
     // add general handler
     self._addGlCb();
@@ -4691,6 +4707,8 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
       }, options.timeout);
     }
     
+    self._processing = true;
+
     // insert script node to head for make request
     $head.insertBefore( $script, $head.firstChild );
   },
@@ -4707,6 +4725,8 @@ Ajax.modules.JSONP.prototype = extend( {}, Ajax.modules._Base.prototype, {
     }
   }
 });
+
+transports.JSONP = JSONPTransport;
 
 
 // statuses
@@ -4733,7 +4753,6 @@ Ajax.STATUSES = STATUSES;
 Ajax.defaults = {
   dataType: "text",
   method: "GET",
-  url: ajaxLocation,
   async: true,
   contentType: "application/x-www-form-urlencoded; charset=utf-8",
   xhrFields: {
