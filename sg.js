@@ -4226,7 +4226,11 @@ Ajax.prototype = {
       dataType = options.dataType,
       data,
       convertor;
-    
+
+    if( response == null ) {
+      return;
+    }
+
     convertor = self._dataTypes[ dataType ];
     if( !convertor ) {
       data = String( response );
@@ -4240,7 +4244,7 @@ Ajax.prototype = {
       self = this,
       status = data[ 0 ],
       statusText = data[ 1 ];
-   
+
     // set timings
     self.endTime = sg.now();
     self.elapsedTime = self.endTime - self.startTime;
@@ -4256,6 +4260,9 @@ Ajax.prototype = {
       self = this;
 
     self.fire( "complete", [ self.statusText ] );
+    
+    // remove all listeners
+    self.off();
   },
   _pResolve: function( data ) {
     var
@@ -4355,6 +4362,7 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
   _onreadystatechange: function() {
     var
       self = this,
+      options = self._options,
       defer = self._defer,
       xhr = self._xhr,
       isAborted = self._aborted,
@@ -4366,8 +4374,16 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
       statusText,
       responses = {};
 
-    xhrReadyState = xhr.readyState;
-    if( !isAborted && xhrReadyState == 4 ) {
+    if( self._completed ) {
+      return;
+    }
+
+    try {
+      xhrReadyState = xhr.readyState;
+    } catch( e ) {
+      xhrReadyState = 0;
+    }
+    if( !isAborted && xhrReadyState === 4 ) {
       xhrStatus = xhr.status;
       
       try {
@@ -4385,21 +4401,18 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
           xhrResponseText = xhr.responseText;
         } catch(e) {}
       }
+      
+      xhr.onreadystatechange = sg.noop;
     }
 
-    if( isAborted || xhrReadyState == 4 ) {
-      xhr.onreadystatechange = sg.noop;
-      
+    if( isAborted || xhrReadyState === 4 ) {
       if( self._tmid ) {
         clearTimeout( self._tmid );
       }
       
       if( !isAborted ) {
-        self._processing = false;
-        self._completed = true;
-        
         if( !xhrStatus && !options.crossDomain ) {
-          xhrStatus = xhrResponsesText ? 200 : 404;
+          xhrStatus = xhrResponseText ? 200 : 404;
         } else if( xhrStatus === 1223 ) {
           xhrStatus = 204;
         }
@@ -4421,6 +4434,9 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
         
         self._cleanup();
       }
+
+      self._processing = false;
+      self._completed = true;
     }
   },
   _abort: function( status ) {
@@ -4429,15 +4445,13 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
       statusText = STATUSES[ status ],
       defer = self._defer;
     
-    xhr.abort();
-    
     self._aborted = true;
-    self._processing = false;
-    self._completed = true;
+    xhr.abort();
+
     self._onreadystatechange();
     
     defer.reject( [ status, statusText, "" ] );
-    
+
     self._cleanup();
   },
   _cleanup: function() {
@@ -4743,7 +4757,6 @@ addStatus("OK", 200, "success" );
 addStatus("NOT_MODIFIED", 304, "notmodified" );
 addStatus("CANCELED", stid++, "canceled" );
 addStatus("ABORT_TIMEOUT", stid++, "timeout" );
-addStatus("BAD_STATUS", stid++, "bad status" );
 addStatus("SYSTEM_ABORT", stid++, "system aborted" );
 addStatus("SEND_ERROR", stid++, "send error" );
 Ajax.STATUSES = STATUSES;
