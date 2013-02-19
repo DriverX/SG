@@ -342,7 +342,7 @@ asyncTest("instance properties", function() {
     n = 0,
     ajax,
     exists = ("url options readyState status statusText responseText " +
-      "responseXML startTime endTime elapsedTime send abort destroy " +
+      "responseXML startTime endTime elapsedTime send abort " +
       "setRequestHeader getAllResponseHeaders getResponseHeader").split(" ");
 
   n += exists.length;

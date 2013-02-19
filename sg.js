@@ -4305,7 +4305,6 @@ Ajax.prototype = {
     }
   },
   abort: getProxyMethod( "abort" ),
-  destroy: getProxyMethod( "destroy" ),
   setRequestHeader: getProxyMethod( "setRequestHeader" ),
   getAllResponseHeaders: getProxyMethod( "getAllResponseHeaders" ),
   getResponseHeader: getProxyMethod( "getResponseHeader" )
@@ -4333,7 +4332,6 @@ function BaseTransport( wrapper ) {
 BaseTransport.prototype = {
   send: function() {},
   abort: function() {},
-  destroy: function() {},
   setRequestHeader: function( name, value ) {},
   getAllResponseHeaders: function() {},
   getResponseHeader: function( name ) {}
@@ -4557,12 +4555,6 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
   setRequestHeader: function( name, value ) {
     var self = this;
     self._reqHeaders[ name ] = value;
-  },
-  destroy: function() {
-    var self = this;
-    if( !self._completed ) {
-      self._abort( Ajax.SYSTEM_ABORT );
-    }
   }
 });
 
@@ -4733,12 +4725,6 @@ JSONPTransport.prototype = extend( {}, BaseTransport.prototype, {
     if( !self._completed ) {
       self._abort( Ajax.CANCELED );
     }
-  },
-  destroy: function() {
-    var self = this;
-    if( !self._completed ) {
-      self._abort( Ajax.SYSTEM_ABORT );
-    }
   }
 });
 
@@ -4760,7 +4746,6 @@ addStatus("NO_CONTENT", 204, "No Content" );
 addStatus("NOT_MODIFIED", 304, "notmodified" );
 addStatus("CANCELED", stid++, "canceled" );
 addStatus("TIMEOUT", stid++, "timeout" );
-addStatus("SYSTEM_ABORT", stid++, "system aborted" );
 addStatus("SEND_ERROR", stid++, "send error" );
 Ajax.STATUSES = STATUSES;
 
