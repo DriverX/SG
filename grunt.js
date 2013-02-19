@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-replace');
-	
+	grunt.loadNpmTasks('grunt-closure-tools');
+
 	grunt.initConfig({
 		files : {
 			name : "sg"
@@ -35,22 +36,24 @@ module.exports = function(grunt) {
 				dest: "dist/portal/<%= files.name %>.js"
 			}
 		},
-		min : {
+		closureCompiler: {
+      options: {
+        compilerFile: "/Users/ilyushenkov/workspace/SG/libexec/closure/build"
+        // "./libexec/closure/build/compiler.jar"
+      },
 			lib: {
-				src : ["<config:concat.lib.dest>"],
-				dest : "<%= files.name %>.min.js"
+        options: {},
+				src: "<config:concat.lib.dest>",
+				dest: "<%= files.name %>.min.js"
 			},
 			portal: {
-				src : ["<config:concat.portal.dest>"],
-				dest : "dist/portal/<%= files.name %>.min.js"
+				src: "<config:concat.portal.dest>",
+				dest: "dist/portal/<%= files.name %>.min.js"
 			}
-		},
-		lint : {
-			files : ["grunt.js"]
 		}
 	});
 
-	grunt.registerTask("lib", "concat:lib min:lib");
-	grunt.registerTask("portal", "concat:lib concat:portal min:portal replace:portal");
-	grunt.registerTask("default", "lint lib");
+	grunt.registerTask("lib", "concat:lib closureCompiler:lib");
+	grunt.registerTask("portal", "concat:lib concat:portal closureCompiler:portal replace:portal");
+	grunt.registerTask("default", "lib");
 };
