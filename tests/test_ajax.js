@@ -277,7 +277,7 @@ asyncTest("times", function() {
     {
       dataType: "json",
       success: function( event, response ) {
-        ok( this.elapsedTime > 500 );
+        ok( this.elapsedTime >= 500 );
         deepEqual( response, {sleep: 500} );
         start();
       }
@@ -292,7 +292,7 @@ asyncTest("times", function() {
     {
       dataType: "jsonp",
       success: function( event, response ) {
-        ok( this.elapsedTime > 500 );
+        ok( this.elapsedTime >= 500 );
         deepEqual( response, {sleep: 500} );
         start();
       }
@@ -324,7 +324,6 @@ asyncTest("times", function() {
       dataType: "jsonp",
       timeout: 1000,
       error: function( event, statusText ) {
-        console.log( this.elapsedTime );
         ok( this.elapsedTime >= 1000 );
         ok( this.elapsedTime < 1100 );
         equal( statusText, "timeout" );
@@ -332,6 +331,91 @@ asyncTest("times", function() {
       }
     }
   );
+  ajax.send();
+
+  expect( n );
+});
+
+
+asyncTest("instance properties", function() {
+  var
+    n = 0,
+    ajax,
+    exists = ("url options readyState status statusText responseText " +
+      "responseXML startTime endTime elapsedTime send abort destroy " +
+      "setRequestHeader getAllResponseHeaders getResponseHeader").split(" ");
+
+  n += exists.length;
+  ajax = SG.Ajax("data/test_ajax_json.json");
+  SG.utils.arrEach( exists, function( prop ) {
+    ok( prop in ajax, "property '"+ prop +"' in ajax" );
+  });
+
+  n += 2;
+  equal( ajax.readyState, 0, "readyState before send()" );
+  ajax.send();
+  equal( ajax.readyState, 1, "readyState after send()" );
+
+  n += 8;
+  ajax = SG.Ajax("data/test_ajax_json.json", {
+    success: function() {
+      equal( this.url, "data/test_ajax_json.json" );
+      equal( this.readyState, 4 );
+      equal( this.status, 200 );
+      equal( this.statusText, "success" );
+      ok( this.elapsedTime > 0 );
+      equal( this.endTime - this.startTime, this.elapsedTime );
+      equal( SG.utils.trim( this.responseText ), '{"foo": "bar"}' );
+      equal( this.responseXml, undefined );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  n += 8;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_jsonp.php", {
+    dataType: "jsonp",
+    success: function() {
+      equal( this.url, "data/test_ajax_jsonp.php" );
+      equal( this.readyState, 4 );
+      equal( this.status, 200 );
+      equal( this.statusText, "success" );
+      ok( this.elapsedTime > 0 );
+      equal( this.endTime - this.startTime, this.elapsedTime );
+      equal( this.responseText, undefined );
+      equal( this.responseXml, undefined );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  n += 3;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_notfound.html", {
+    error: function() {
+      equal( this.readyState, 4 );
+      equal( this.status, 404 );
+      equal( this.statusText, "Not Found" );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  n += 3;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_notfound.html", {
+    error: function() {
+      equal( this.readyState, 4 );
+      equal( this.status, 404 );
+      equal( this.statusText, "Not Found" );
+
+      start();
+    }
+  });
   ajax.send();
 
   expect( n );
