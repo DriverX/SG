@@ -4754,6 +4754,7 @@ function addStatus( name, code, text ) {
   STATUSES[ code ] = text;
 }
 addStatus("OK", 200, "success" );
+addStatus("NO_CONTENT", 204, "No Content" );
 addStatus("NOT_MODIFIED", 304, "notmodified" );
 addStatus("CANCELED", stid++, "canceled" );
 addStatus("ABORT_TIMEOUT", stid++, "timeout" );
