@@ -4420,11 +4420,13 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
         statusText = STATUSES[ xhrStatus ] || xhrStatusText;
         
         if( xhrStatus >= 200 && xhrStatus < 300 || xhrStatus === 304 ) {
-          if( xhrResponseText ) {
-            responses.text = xhrResponseText;
-          }
-          if( xhrResponseXml ) {
-            responses.xml = xhrResponseXml;
+          if( xhrStatus !== 204 ) {
+            if( xhrResponseText ) {
+              responses.text = xhrResponseText;
+            }
+            if( xhrResponseXml ) {
+              responses.xml = xhrResponseXml;
+            }
           }
 
           defer.resolve( [ xhrStatus, statusText, responses ] );

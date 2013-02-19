@@ -307,7 +307,7 @@ asyncTest("times", function() {
     {
       timeout: 1000,
       error: function( event, statusText ) {
-        ok( this.elapsedTime > 1000 );
+        ok( this.elapsedTime >= 1000 );
         ok( this.elapsedTime < 1100 );
         equal( statusText, "timeout" );
         start();
@@ -324,7 +324,8 @@ asyncTest("times", function() {
       dataType: "jsonp",
       timeout: 1000,
       error: function( event, statusText ) {
-        ok( this.elapsedTime > 1000 );
+        console.log( this.elapsedTime );
+        ok( this.elapsedTime >= 1000 );
         ok( this.elapsedTime < 1100 );
         equal( statusText, "timeout" );
         start();
@@ -335,7 +336,6 @@ asyncTest("times", function() {
 
   expect( n );
 });
-
 
 
 
