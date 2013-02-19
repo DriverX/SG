@@ -422,6 +422,88 @@ asyncTest("instance properties", function() {
 });
 
 
+asyncTest("abortation", function() {
+  var
+    n = 0,
+    ajax;
+
+  n += 5;
+  ajax = SG.Ajax("data/test_ajax_json.json", {
+    error: function( event, statusText ) {
+      equal( statusText, "canceled" );
+      equal( this.readyState, 0 );
+      equal( this.status, SG.Ajax.CANCELED );
+      equal( this.responseText, undefined );
+      equal( this.responseXml, undefined );
+
+      start();
+    }
+  });
+  ajax.send();
+  ajax.abort();
+  
+  n += 5;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_jsonp.php", {
+    dataType: "jsonp",
+    error: function( event, statusText ) {
+      equal( statusText, "canceled" );
+      equal( this.readyState, 0 );
+      equal( this.status, SG.Ajax.CANCELED );
+      equal( this.responseText, undefined );
+      equal( this.responseXml, undefined );
+
+      start();
+    }
+  });
+  ajax.send();
+  ajax.abort();
+  
+  n += 7;
+  stop();
+  var ajax2 = SG.Ajax("data/test_ajax_times.php?sleep=1000", {
+    error: function( event, statusText ) {
+      equal( statusText, "canceled" );
+      equal( this.readyState, 0 );
+      equal( this.status, SG.Ajax.CANCELED );
+      equal( this.responseText, undefined );
+      equal( this.responseXml, undefined );
+      ok( this.elapsedTime >= 500 );
+      ok( this.elapsedTime < 1000 );
+
+      start();
+    }
+  });
+  ajax2.send();
+  setTimeout(function() {
+    ajax2.abort();
+  }, 500);
+
+  n += 7;
+  stop();
+  var ajax3 = SG.Ajax("data/test_ajax_times.php?sleep=1000", {
+    dataType: "jsonp",
+    error: function( event, statusText ) {
+      equal( statusText, "canceled" );
+      equal( this.readyState, 0 );
+      equal( this.status, SG.Ajax.CANCELED );
+      equal( this.responseText, undefined );
+      equal( this.responseXml, undefined );
+      ok( this.elapsedTime >= 500 );
+      ok( this.elapsedTime < 1000 );
+
+      start();
+    }
+  });
+  ajax3.send();
+  setTimeout(function() {
+    ajax3.abort();
+  }, 500);
+  
+  expect( n );
+});
+
+
 
 
 

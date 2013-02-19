@@ -4778,9 +4778,7 @@ Ajax.defaults = {
   jsonpCallback: function() {
     return sg.expando + "_" + reqId++; 
   },
-  scriptCharset: "utf-8",
-  CORSDegrade: false,
-  CORSUrlDegrade: "domain"
+  scriptCharset: "utf-8"
 };
 
 
@@ -4788,6 +4786,22 @@ Ajax.defaults = {
 sg.Ajax = Ajax;
 
 })( window, SG );
+
+
+(function( sg ) {
+
+var
+  utils = sg.utils,
+  Ajax = sg.Ajax;
+
+function AjaxManager() {
+  // TODO
+}
+
+// share
+sg.AjaxManager = AjaxManager;
+
+})( SG );
 
 
 /**

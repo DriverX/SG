@@ -25,6 +25,7 @@ module.exports = function(grunt) {
           "lib/sg.when.js",
           "lib/sg.event.js",
           "lib/sg.ajax2.js",
+          "lib/sg.ajax_manager.js",
           "lib/sg.tmpl.js"
         ],
 				dest: "<%= files.name %>.js"
