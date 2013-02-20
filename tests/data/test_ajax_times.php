@@ -1,4 +1,5 @@
 <?php
+header("Content-Type: text/plain; charset=utf-8");
 
 $callback = NULL;
 if(isset($_GET["callback"])) {

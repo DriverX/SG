@@ -1,4 +1,5 @@
 <?php
+header("Content-Type: text/plain; charset=utf-8");
 
 if (!function_exists('http_response_code')) {
     function http_response_code($code = NULL) {

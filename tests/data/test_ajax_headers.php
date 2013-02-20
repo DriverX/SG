@@ -1,5 +1,7 @@
 <?php
 
+header("Content-Type: text/plain; charset=utf-8");
+
 $headers = array();
 foreach ($_SERVER as $key => $value) {
     if (strpos($key, 'HTTP_') === 0) {
