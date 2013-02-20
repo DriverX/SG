@@ -4088,8 +4088,10 @@ var
   // from jQuery
   rurl = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/,
   rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
+  rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg,
   ajaxLocation,
   ajaxLocParts,
+
   reqId = 1;
 
 try {
@@ -4333,8 +4335,8 @@ BaseTransport.prototype = {
   send: function() {},
   abort: function() {},
   setRequestHeader: function( name, value ) {},
-  getAllResponseHeaders: function() {},
-  getResponseHeader: function( name ) {}
+  getAllResponseHeaders: function() {return null;},
+  getResponseHeader: function( name ) {return null;}
 };
 
 transports._Base = BaseTransport;
@@ -4351,6 +4353,8 @@ function XHRTransport( wrapper ) {
   self._aborted = false;
   self._tmid = null;
   self._reqHeaders = {};
+  self._resHeadersStr = null;
+  self._resHeaders = {};
 }
 
 XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
@@ -4369,6 +4373,7 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
       xhrReadyState,
       xhrResponseXml,
       xhrResponseText,
+      xhrAllResponseHeaders,
       statusText,
       responses = {};
 
@@ -4390,15 +4395,16 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
         xhrStatusText = "";
       }
       
-      if( xhrReadyState == 4 ) {
-        var xml = xhr.responseXML;
-        if ( xml && xml.documentElement ) {
-          xhrResponseXml = xml;
-        }
-        try {
-          xhrResponseText = xhr.responseText;
-        } catch(e) {}
+      var xml = xhr.responseXML;
+      if ( xml && xml.documentElement ) {
+        xhrResponseXml = xml;
       }
+      try {
+        xhrResponseText = xhr.responseText;
+      } catch(e) {}
+
+      xhrAllResponseHeaders = xhr.getAllResponseHeaders();
+      self._resHeadersStr = xhrAllResponseHeaders;
     }
 
     if( isAborted || xhrReadyState === 4 ) {
@@ -4555,6 +4561,29 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
   setRequestHeader: function( name, value ) {
     var self = this;
     self._reqHeaders[ name ] = value;
+  },
+  getAllResponseHeaders: function() {
+    var
+      self = this,
+      headersStr = self._resHeadersStr;
+    return headersStr == null ? null : headersStr;
+  },
+  getResponseHeader: function( name ) {
+    var
+      self = this,
+      match,
+      nameLower = name.toLowerCase(),
+      headers = self._resHeaders,
+      headersStr = self._resHeadersStr;
+
+    match = headers[ nameLower ];
+    if( headersStr != null && match === undefined ) {
+      while( ( match = rheaders.exec( headersStr ) ) ) {
+        headers[ match[ 1 ].toLowerCase() ] = match[ 2 ];
+      }
+      match = headers[ nameLower ];
+    }
+    return match === undefined ? null : match;
   }
 });
 

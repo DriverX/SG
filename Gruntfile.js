@@ -42,7 +42,6 @@ module.exports = function(grunt) {
         compilerFile: "./libexec/closure/build/compiler.jar"
       },
 			lib: {
-        options: {},
 				src: "<%= concat.lib.dest %>",
 				dest: "<%= files.name %>.min.js"
 			},

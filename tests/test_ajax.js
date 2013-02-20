@@ -489,7 +489,81 @@ asyncTest("abortation", function() {
 });
 
 
+asyncTest("headers", function() {
+  var
+    n = 0,
+    ajax;
+  
+  n += 4;
+  ajax = SG.Ajax("data/test_ajax_headers.php", {
+    success: function( event, response ) {
+      var allHeaders = this.getAllResponseHeaders();
+      ok( allHeaders != null, "headers string not null" );
+      ok( allHeaders.indexOf("X-Test") >= 0, "X-Test in headers string" );
 
+      equal(
+        this.getResponseHeader("X-Test"),
+        "OK",
+        "getResponseHeader('X-Test')"
+      );
+      equal(
+        this.getResponseHeader("CONTENT-TYPE"),
+        this.getResponseHeader("Content-Type"),
+        "getResponseHeader() case insensitivity"
+      );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  n += 4;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_headers.php", {
+    dataType: "json",
+    success: function( event, response ) {
+      ok( "X-Requested-With" in response, "header X-Requested-With exists" );
+      equal(
+        response["X-Requested-With"],
+        "XMLHttpRequest",
+        "header X-Requested-With=XMLHttpRequest"
+      );
+
+      ok( "X-Foo" in response, "header X-Foo exists" );
+      equal( response["X-Foo"], "bar", "header X-Foo=bar" );
+
+      start();
+    }
+  });
+  ajax.setRequestHeader("X-Foo", "bar");
+  ajax.send();
+
+  n += 4;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_headers.php", {
+    dataType: "jsonp",
+    success: function( event, response ) {
+      ok( !!response, "jsonp: response" );
+      ok( !("X-Foo" in response), "jsonp: header X-Foo not exists" );
+      equal(
+        this.getAllResponseHeaders(),
+        null,
+        "jsonp: getAllResponseHeaders() is null"
+      );
+      equal(
+        this.getResponseHeader("X-Test"),
+        null,
+        "jsonp: getResponseHeader('X-Test') is null"
+      );
+
+      start();
+    }
+  });
+  ajax.setRequestHeader("X-Foo", "bar");
+  ajax.send();
+
+  expect( n );
+});
 
 
 
