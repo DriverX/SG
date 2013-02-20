@@ -2434,11 +2434,15 @@ function Suggest( inputOptions ) {
     
     selectMethod = null;
     
-    
-  if( !$field || !$container || !$list ) {
-    throw "";
+  if( !$field ) {
+    throw "options.field not found";
   }
-  
+  if( !$container ) {
+    throw "options.cont not found";
+  }
+  if( !$list ) {
+    throw "options.list not found";
+  }
   
   // Если включен дебаг, то логируем все внутренние события
   if( options.debug ) {
