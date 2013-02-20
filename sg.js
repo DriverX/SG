@@ -2457,7 +2457,8 @@ function Suggest( inputOptions ) {
   
   // External interface
   extend( self, {
-    _reqMgr: request,
+    _request: request,
+    _checker: checker,
 
     // nodes
     field: $field,
