@@ -27,7 +27,6 @@ module.exports = function(grunt) {
           "lib/sg.when.js",
           "lib/sg.event.js",
           "lib/sg.ajax2.js",
-          "lib/sg.ajax_manager.js",
           "lib/sg.tmpl.js"
         ],
 				dest: "<%= files.name %>.js"
@@ -53,6 +52,11 @@ module.exports = function(grunt) {
 	});
 
 	grunt.registerTask("lib", ["concat:lib", "closureCompiler:lib"]);
-	grunt.registerTask("portal", ["concat:lib", "concat:portal", "closureCompiler:portal", "replace:portal"]);
+	grunt.registerTask("portal", [
+      "concat:lib",
+      "concat:portal",
+      "closureCompiler:portal",
+      "replace:portal"
+    ]);
 	grunt.registerTask("default", ["lib"]);
 };

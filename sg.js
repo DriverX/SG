@@ -4280,7 +4280,7 @@ Ajax.prototype = {
     } else {
       response = responses;
     }
-    
+
     self.fire( "success", [ response, self.statusText ] );
   },
   _pReject: function( data ) {
@@ -4800,22 +4800,6 @@ Ajax.defaults = {
 sg.Ajax = Ajax;
 
 })( window, SG );
-
-
-(function( sg ) {
-
-var
-  utils = sg.utils,
-  Ajax = sg.Ajax;
-
-function AjaxManager() {
-  // TODO
-}
-
-// share
-sg.AjaxManager = AjaxManager;
-
-})( SG );
 
 
 /**
