@@ -114,21 +114,6 @@ asyncTest("statuses", function() {
   );
   ajax.send();
   
-  n += 3;
-  stop();
-  ajax = SG.Ajax(
-    SG.utils.format( dummy_url, {code: 204}),
-    {
-      success: function( event, response, statusText ) {
-        equal( response, undefined );
-        equal( statusText, "No Content" );
-        equal( this.status, 204 );
-        start();
-      }
-    }
-  );
-  ajax.send();
-  
   n += 2;
   stop();
   ajax = SG.Ajax(
