@@ -2846,8 +2846,6 @@ sg.yass = sg.$$ = utils.$$ = _;
 
 })( window, SG );
 
-/** @license MIT License (c) copyright B Cavalier & J Hann */
-
 /**
  * A lightweight CommonJS Promises/A and when() implementation
  * when is part of the cujo.js family of libraries (http://cujojs.com/)
@@ -2856,6 +2854,8 @@ sg.yass = sg.$$ = utils.$$ = _;
  * http://www.opensource.org/licenses/mit-license.php
  *
  * @version 1.7.1
+ *
+ * MIT License (c) copyright B Cavalier & J Hann
  */
 
 (function(define) { 'use strict';
