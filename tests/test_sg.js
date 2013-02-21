@@ -334,6 +334,9 @@ asyncTest("ajax manager", function() {
     } else if( value === "baz" ) {
       equal( reason, "timeout", "value 'baz': abort reason - timeout" );
       start();
+
+      sg.destroy();
+      $cont.empty();
     } else {
       ok(false, "error: it's never called");
     }
@@ -353,7 +356,71 @@ asyncTest("ajax manager", function() {
 });
 
 
+asyncTest("cache", function() {
+  $('<form action=""><input class="sgfield" name="q"></form><div class="sgcont"></div>').appendTo( $cont );
 
+  var
+    n = 0,
+    sg,
+    field = SG.$(".sgfield"),
+    cont = SG.$(".sgcont"),
+    ajax_returns = 0,
+    cache_returns = 0,
+    cache_sets = 0;
+
+  sg = SG({
+    field: field,
+    cont: cont,
+    delay: 50,
+    url: "data/test_sg_data.php?query={query}",
+    ajax: {
+      dataType: "json"
+    },
+    cchLimit: 2
+  });
+
+  n += 2;
+  sg.on( SG.evt.completeRequest, function() {
+    ajax_returns++;
+    equal( ajax_returns, 1, "one ajax call");
+  });
+  sg.on( SG.evt.setCacheEnd, function() {
+    cache_sets++;
+    equal( cache_sets, 1, "set to cache" );
+
+    start();
+    test2();
+  });
+
+  field.focus();
+  field.value = "foo";
+ 
+  n += 2;
+  function test2() {
+    sg.off();
+
+    ok( sg._cache.has("foo"), "value 'foo' exists in cache")
+    equal( sg._cache.i, 1, "cache size == 1" );
+
+    field.value = "bar";
+    stop();
+    setTimeout(function() {
+      field.value = "baz";
+      sg.on( SG.evt.valueChange, function() {
+        sg.on( SG.evt.stopRequest, test3 );
+      });
+    }, 60);
+  }
+
+  n += 1;
+  function test3() {
+    equal( sg._cache.i, 1, "cache is flushed");
+    start();
+    sg.off();
+  }
+  
+  expect( n );
+});
 
 
 
