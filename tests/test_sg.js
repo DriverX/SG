@@ -298,7 +298,8 @@ asyncTest("ajax manager", function() {
     n = 0,
     sg,
     field = SG.$(".sgfield"),
-    cont = SG.$(".sgcont");
+    cont = SG.$(".sgcont"),
+    sleep_calls = 1;
 
   sg = SG({
     field: field,
@@ -307,27 +308,47 @@ asyncTest("ajax manager", function() {
     url: "data/test_sg_data.php?query={query}",
     ajax: {
       dataType: "json",
-      timeout: null,
+      timeout: 1000,
       data: {
-        sleep: 200
-      }
+        sleep: function() {
+          return sleep_calls++ % 3 ? 500 : 1500;
+        }
+      },
+      stackSize: 2
     }
   });
 
+
+  n += 3;
   sg.on( SG.evt.successRequest, function( event, response, value ) {
-    console.log( "success", response, value );
+    if( value === "foo" || value === "baz" ) {
+      ok(false, "success: it's never called");
+    } else {
+      equal( value, "bar", "success request with value 'bar'");
+    }
   });
   sg.on( SG.evt.errorRequest, function( event, reason, value ) {
-    console.log( "error", reason, value );
+    if( value === "foo" ) {
+      equal( reason, "canceled", "value 'foo': abort reason - canceled" );
+      start();
+    } else if( value === "baz" ) {
+      equal( reason, "timeout", "value 'baz': abort reason - timeout" );
+      start();
+    } else {
+      ok(false, "error: it's never called");
+    }
   });
 
   field.focus();
   field.value = "foo";
+  stop();
+  setTimeout(function() {
+    field.value = "bar";
+    setTimeout(function() {
+      field.value = "baz";
+    }, 100);
+  }, 100);
   
-  n++;
-  start();
-  ok(true);
-
   expect( n );
 });
 
