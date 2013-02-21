@@ -566,5 +566,85 @@ asyncTest("headers", function() {
 });
 
 
+asyncTest("extra url params", function() {
+  var
+    n = 0,
+    ajax;
+
+  n += 6;
+  ajax = SG.Ajax("data/test_ajax_extraparams.php?foo=bar", {
+    dataType: "json",
+    data: {
+      baz: "qux",
+      fooo: function() {
+        return 42;
+      }
+    },
+    success: function( event, response ) {
+      ok( "foo" in response.GET, "GET.foo exists" );
+      equal( response.GET.foo, "bar", "GET.foo == 'bar'" );
+      ok( "baz" in response.GET, "GET.baz exists" );
+      equal( response.GET.baz, "qux", "GET.baz == 'qux'" );
+      ok( "fooo" in response.GET, "GET.fooo exists" );
+      equal( response.GET.fooo, "42", "GET.fooo == '42'" );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  n += 6;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_extraparams.php?foo=bar", {
+    dataType: "json",
+    method: "post",
+    data: {
+      baz: "qux",
+      fooo: function() {
+        return 42;
+      }
+    },
+    success: function( event, response ) {
+      ok( "foo" in response.POST, "POST.foo exists" );
+      equal( response.POST.foo, "bar", "POST.foo == 'bar'" );
+      ok( "baz" in response.POST, "POST.baz exists" );
+      equal( response.POST.baz, "qux", "POST.baz == 'qux'" );
+      ok( "fooo" in response.POST, "POST.fooo exists" );
+      equal( response.POST.fooo, "42", "POST.fooo == '42'" );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  n += 8;
+  stop();
+  ajax = SG.Ajax("data/test_ajax_extraparams.php?foo=bar", {
+    dataType: "jsonp",
+    data: {
+      baz: "qux",
+      fooo: function() {
+        return 42;
+      }
+    },
+    success: function( event, response ) {
+      ok( "_" in response.GET, "jsonp: GET._ exists" );
+      ok( "callback" in response.GET, "jsonp: GET.callback exists" );
+      ok( "foo" in response.GET, "jsonp: GET.foo exists" );
+      equal( response.GET.foo, "bar", "jsonp: GET.foo == 'bar'" );
+      ok( "baz" in response.GET, "jsonp: GET.baz exists" );
+      equal( response.GET.baz, "qux", "jsonp: GET.baz == 'qux'" );
+      ok( "fooo" in response.GET, "jsonp: GET.fooo exists" );
+      equal( response.GET.fooo, "42", "jsonp: GET.fooo == '42'" );
+
+      start();
+    }
+  });
+  ajax.send();
+
+  expect( n );
+});
+
+
 })();
 

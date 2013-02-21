@@ -223,7 +223,7 @@ asyncTest("value checker", function() {
   equal( checker.rcnt, null, "init: checker.rcnt==null" );
   start();
 
-  n += 14;
+  n += 17;
   stop();
   sg.on( SG.evt.valueChange, function( event, curr, prev, recent ) {
     equal( curr, "bar", "event.curr=='bar'" );
@@ -252,10 +252,6 @@ asyncTest("value checker", function() {
       equal( checker.prev, "baz", "new value (on): checker.prev=='baz'" );
       equal( checker.rcnt, "bar", "new value (on): checker.rcnt=='bar'" );
       
-      function valueChange1( event, curr, prev, recent ) {
-        equal( curr, prev, "fire with no check: curr == prev" );
-        equal( recent, "bar", "fire with no check: rcnt not changed" );
-      }
       sg.on(
         SG.evt.valueChange,
         function( event, curr, prev, recent ) {
@@ -267,19 +263,73 @@ asyncTest("value checker", function() {
       sg.off( SG.evt.valueChange );
 
       sg.on( SG.evt.valueChange, function( event, curr, prev, recent ) {
-        ok(false, "it's never called");
+        ok(false, "fire: it's never called");
       });
       checker.fire();
       sg.off( SG.evt.valueChange );
       
-      sg.destroy();
-      $cont.empty();
+      sg.on( SG.evt.valueChange, function( event, curr, prev, recent ) {
+        ok(false, "ignore: it's never called");
+      });
+      checker.setIgnore("qux");
+      stop();
+      setTimeout(function() {
+        equal( checker.curr, "qux", "ignore: checker.curr == 'qux'");
+        equal( checker.prev, "qux", "ignore: checker.prev == 'qux'");
+        equal( checker.rcnt, "bar", "ignore: checker.rcnt == 'bar'");
+        start();
+
+        sg.off( SG.evt.valueChange );
+
+        sg.destroy();
+        $cont.empty();
+      }, 50);
     }, 50);
   }, 50);
 
   expect( n );
 });
 
+
+asyncTest("ajax manager", function() {
+  $('<form action=""><input class="sgfield" name="q"></form><div class="sgcont"></div>').appendTo( $cont );
+
+  var
+    n = 0,
+    sg,
+    field = SG.$(".sgfield"),
+    cont = SG.$(".sgcont");
+
+  sg = SG({
+    field: field,
+    cont: cont,
+    delay: 50,
+    url: "data/test_sg_data.php?query={query}",
+    ajax: {
+      dataType: "json",
+      timeout: null,
+      data: {
+        sleep: 200
+      }
+    }
+  });
+
+  sg.on( SG.evt.successRequest, function( event, response, value ) {
+    console.log( "success", response, value );
+  });
+  sg.on( SG.evt.errorRequest, function( event, reason, value ) {
+    console.log( "error", reason, value );
+  });
+
+  field.focus();
+  field.value = "foo";
+  
+  n++;
+  start();
+  ok(true);
+
+  expect( n );
+});
 
 
 

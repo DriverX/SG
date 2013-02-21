@@ -557,12 +557,22 @@ var SGUtils = {
    * @return {String}
    */
   aprm: function( url, params ) {
-    if( !params ) {
+    url = String( url );
+    
+    var
+      parts,
+      lastChar,
+      okparams = params;
+    if( params && typeof params !== "string" ) {
+      okparams = SGUtils.prm( params );
+    }
+    if( !okparams ) {
       return url;
     }
-    url = String( url );
-    var parts = [ url ],
-      lastChar = url.charAt( url.length - 1 );
+
+    parts = [ url ];
+    lastChar = url.charAt( url.length - 1 );
+
     parts.push(
       !~url.indexOf( "?" )
         ? "?"
@@ -2468,6 +2478,7 @@ function Suggest( inputOptions ) {
   extend( self, {
     _request: request,
     _checker: checker,
+    _cache: cache,
 
     // nodes
     field: $field,
@@ -4329,7 +4340,8 @@ Ajax.prototype = {
   abort: getProxyMethod( "abort" ),
   setRequestHeader: getProxyMethod( "setRequestHeader" ),
   getAllResponseHeaders: getProxyMethod( "getAllResponseHeaders" ),
-  getResponseHeader: getProxyMethod( "getResponseHeader" )
+  getResponseHeader: getProxyMethod( "getResponseHeader" ),
+  getResolvedUrl: getProxyMethod( "getResolvedUrl" )
 };
 
 // provide Event methods (on, off, fire)
@@ -4347,6 +4359,7 @@ function BaseTransport( wrapper ) {
 
   self._wrap = wrapper;
   self._url = wrapper.url;
+  self._resolvedUrl = null;
   self._options = wrapper.options;
   self._defer = wrapper._defer;
 }
@@ -4356,7 +4369,28 @@ BaseTransport.prototype = {
   abort: function() {},
   setRequestHeader: function( name, value ) {},
   getAllResponseHeaders: function() {return null;},
-  getResponseHeader: function( name ) {return null;}
+  getResponseHeader: function( name ) {return null;},
+  resolveUrl: function() {
+    var
+      self = this,
+      options = self._options,
+      resolvedUrl = self._url;
+    
+    if( options.data ) {
+      resolvedUrl = utils.aprm( resolvedUrl, options.data );
+    }
+    return resolvedUrl;
+  },
+  getResolvedUrl: function() {
+    var
+      self = this,
+      resolved = self._resolvedUrl;
+    if( resolved == null ) {
+      resolved = self.resolveUrl();
+      self._resolvedUrl = resolved;
+    }
+    return resolved;
+  }
 };
 
 transports._Base = BaseTransport;
@@ -4512,7 +4546,7 @@ XHRTransport.prototype = extend( {}, BaseTransport.prototype, {
     
     method = options.method;
     
-    url = self._url;
+    url = self.getResolvedUrl();
     if( method === "POST" ) {
       urlQSStart = url.indexOf("?");
       if( ~urlQSStart ) {
@@ -4707,6 +4741,38 @@ JSONPTransport.prototype = extend( {}, BaseTransport.prototype, {
         || document.documentElement );
   },
 
+  _getJsonpCallback: function() {
+    var
+      self = this,
+      jsonpCallback = self._jsonpCallback;
+    if( !jsonpCallback ) {
+      jsonpCallback = self._options.jsonpCallback;
+      if( isFn( jsonpCallback ) ) {
+        jsonpCallback = jsonpCallback();
+      }
+      self._jsonpCallback = jsonpCallback;
+    }
+    return jsonpCallback;
+  },
+
+  resolveUrl: function() {
+    var
+      self = this,
+      options = self._options,
+      jsonpParam = options.jsonp,
+      resolved,
+      extra = {};
+
+    resolved = BaseTransport.prototype.resolveUrl.call( self );
+
+    extra[ jsonpParam ] = self._getJsonpCallback();
+    if( !options.cache ) {
+      extra["_"] = sg.now();
+    }
+    resolved = utils.aprm( resolved, extra );
+    return resolved;
+  },
+
   // public methods
   send: function() {
     var self = this;
@@ -4716,29 +4782,11 @@ JSONPTransport.prototype = extend( {}, BaseTransport.prototype, {
     
     var options = self._options,
       $head = self._getNodeToInsert(),
-      jsonpParam = options.jsonp,
-      jsonpCallback = options.jsonpCallback,
       charset = options.scriptCharset,
       $script,
-      url,
-      extraData = {};
+      url;
       
-    if( isFn( jsonpCallback ) ) {
-      jsonpCallback = jsonpCallback();
-    }
-    
-    if( options.data ) {
-      extraData = extend( extraData, options.data );
-    }
-    extraData[ jsonpParam ] = jsonpCallback;
-    
-    if( !options.cache ) {
-      extraData["_"] = sg.now();
-    }
-    
-    url = self._url;
-    // build url
-    url = utils.aprm( url, extraData );
+    url = self.getResolvedUrl();
     
     $script = utils.cre("script");
     $script.async = true;
@@ -4753,7 +4801,6 @@ JSONPTransport.prototype = extend( {}, BaseTransport.prototype, {
     
     // add props
     self._script = $script;
-    self._jsonpCallback = jsonpCallback;
     
     // add general handler
     self._addGlCb();

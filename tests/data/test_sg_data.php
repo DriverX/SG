@@ -130,6 +130,20 @@ if(isset($_GET["callback"])) {
     $callback = $_GET["callback"];
 }
 
+
+$sleep = NULL;
+if(isset($_GET["sleep"])) {
+    $sleep = (int) $_GET["sleep"];
+}
+
+if($sleep && $sleep > 0 && $sleep < 30000) {
+    $usleep = $sleep * 1000;
+
+    usleep($usleep);
+}
+
+
+
 if($callback) {
     echo ';window['.json_encode($callback).'](';
 }

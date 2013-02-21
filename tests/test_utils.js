@@ -399,6 +399,7 @@ test("aprm", function() {
   equal( SG.utils.aprm(null, "foo=bar"), "null?foo=bar" );
   equal( SG.utils.aprm(undefined, "foo=bar"), "undefined?foo=bar" );
   equal( SG.utils.aprm("/"), "/" );
+  equal( SG.utils.aprm("/", {"foo": null}), "/" );
 });
 
 
