@@ -366,7 +366,7 @@ var SGUtils = {
       if( from < 0 ) {
         i = Math.max( l - Math.abs( from ), 0 );
       } else {
-      	i = from;
+        i = from;
       }
       for( ; i < l; i++ ) {
         if( arr[ i ] === find ) {
@@ -500,19 +500,18 @@ var SGUtils = {
         } catch(e) {}
       }
       if( !arr || arr.length !== l ) {
-      	arr = new Array( l );
-      	if( isString ) {
-      	  while( l-- ) {
+        arr = new Array( l );
+        if( isString ) {
+          while( l-- ) {
             arr[ l ] = arrayLike.charAt( l );
           }
-      	} else {
-      	  while( l-- ) {
+        } else {
+          while( l-- ) {
             if( l in arrayLike ) {
               arr[ l ] = arrayLike[ l ];
             }
           }
-      	}
-        
+        }
       }
     }
     return arr || [];
@@ -952,7 +951,10 @@ function Suggest( inputOptions ) {
           this.prev = current;
           
           if( noCheck || this.ignr == null || this.ignr !== current ) {
-            fireEvent( SuggestEvents.valueChange, [ current, previous, this.rcnt ] );
+            fireEvent(
+              SuggestEvents.valueChange,
+              [ current, previous, this.rcnt ]
+            );
             
             // Обрабатываем запрос
             handleValue( current );
@@ -987,10 +989,11 @@ function Suggest( inputOptions ) {
       on: function() {
         if( !this.run ) {
           var self = this;
-          this.run = true;
-          this.did = setInterval(function() {
+          self.run = true;
+          self.did = setInterval(function() {
             self.handler();
           }, options.delay );
+          self.handler();
         } 
       },
       off: function() {
@@ -1001,10 +1004,13 @@ function Suggest( inputOptions ) {
         }
       },
       setIgnore: function( value ) {
-        if( getVal() !== value ) {
-          setVal( value );
-          this.ignr = value;
-        }
+        // if( getVal() !== value ) {
+        //   setVal( value );
+        //   this.ignr = value;
+        // }
+        
+        setVal( value );
+        this.ignr = value;
       }
     };
   
@@ -2541,12 +2547,15 @@ Suggest.opts = {
     timeout: 5000,
     stackSize: 2
   },
+
+  // !deprecated options
   // callbackParam: "callback",
   // reqTimeout: 5000,
   // reqMax: 2,
   // reqDataType: "jsonp",
   // reqData: {},
   // scriptCharset: "utf-8",
+
   dataFilter: function( data ) {
     return data;
   },

@@ -183,6 +183,9 @@ asyncTest("on/off native autocomplete", function() {
       ok( SG.utils.hasFocus( field ), "field has focus after disabling" );
 
       start();
+      
+      sg.destroy();
+      $cont.empty();
     }, 50);
   }, 50);
   
@@ -191,7 +194,91 @@ asyncTest("on/off native autocomplete", function() {
 });
 
 
+asyncTest("value checker", function() {
+  $('<form action=""><input class="sgfield" name="q"></form><div class="sgcont"></div>').appendTo( $cont );
 
+  var
+    n = 0,
+    sg,
+    field = SG.$(".sgfield"),
+    cont = SG.$(".sgcont");
+
+  field.value = "foo";
+
+  sg = SG({
+    field: field,
+    cont: cont,
+    delay: 50,
+    url: "data/test_sg_data.php?query={query}",
+    ajax: {
+      dataType: "json",
+      timeout: null
+    }
+  });
+  
+  n += 3;
+  var checker = sg._checker;
+  equal( checker.curr, "foo", "init: checker.curr=='foo'" );
+  equal( checker.prev, "foo", "init: checker.prev=='foo'" );
+  equal( checker.rcnt, null, "init: checker.rcnt==null" );
+  start();
+
+  n += 14;
+  stop();
+  sg.on( SG.evt.valueChange, function( event, curr, prev, recent ) {
+    equal( curr, "bar", "event.curr=='bar'" );
+    equal( prev, "foo", "event.prev=='foo'" );
+    equal( recent, "foo", "event.rcnt=='foo'" );
+  });
+  field.value = "bar";
+  setTimeout(function() {
+    equal( checker.curr, "bar", "new value: checker.prev=='bar'" );
+    equal( checker.prev, "bar", "new value: checker.prev=='bar'" );
+    equal( checker.rcnt, "foo", "new value: checker.rcnt=='foo'" );
+    sg.off( SG.evt.valueChange );
+    start();
+    
+    checker.off();
+    stop();
+    field.value = "baz";
+    setTimeout(function() {
+      equal( checker.curr, "bar", "new value (off): checker.prev=='bar'" );
+      equal( checker.prev, "bar", "new value (off): checker.prev=='bar'" );
+      equal( checker.rcnt, "foo", "new value (off): checker.rcnt=='foo'" );
+
+      start();
+      checker.on();
+      equal( checker.curr, "baz", "new value (on): checker.prev=='baz'" );
+      equal( checker.prev, "baz", "new value (on): checker.prev=='baz'" );
+      equal( checker.rcnt, "bar", "new value (on): checker.rcnt=='bar'" );
+      
+      function valueChange1( event, curr, prev, recent ) {
+        equal( curr, prev, "fire with no check: curr == prev" );
+        equal( recent, "bar", "fire with no check: rcnt not changed" );
+      }
+      sg.on(
+        SG.evt.valueChange,
+        function( event, curr, prev, recent ) {
+          equal( curr, prev, "fire with no check: curr == prev" );
+          equal( recent, "bar", "fire with no check: rcnt not changed" );
+        }
+      );
+      checker.fire( true );
+      sg.off( SG.evt.valueChange );
+
+      sg.on( SG.evt.valueChange, function( event, curr, prev, recent ) {
+        ok(false, "it's never called");
+      });
+      checker.fire();
+      sg.off( SG.evt.valueChange );
+      
+      sg.destroy();
+      $cont.empty();
+    }, 50);
+  }, 50);
+
+  expect( n );
+});
 
 
 
