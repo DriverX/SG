@@ -96,7 +96,7 @@ asyncTest("basic requests", function() {
 
 asyncTest("statuses", function() {
   var n = 0,
-    dummy_url = "data/test_ajax_status.php?code={code}",
+    dummy_url = "data/test_ajax_httpcode.php?code={code}",
     ajax;
 
   n += 4;
