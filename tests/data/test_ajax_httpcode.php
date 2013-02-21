@@ -74,7 +74,7 @@ if($code) {
     http_response_code($code);
 }
 
-if($code != 204 ) {
+if($code == 204 || $code == 404) {
     echo "code=".http_response_code();
 }
 
