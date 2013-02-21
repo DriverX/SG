@@ -1590,9 +1590,12 @@ function Suggest( inputOptions ) {
     
     // disable native autocomplete
     turn = turn ? "on" : "off";
-    SGUtils.attr( $field, "autocomplete", turn );
-    SGUtils.attr( $field, "autocapitalize", turn );
-    SGUtils.attr( $field, "autocorrect", turn );
+    SGUtils.arrEach(
+      ["autocomplete", "autocapitalize", "autocorrect"],
+      function( attr ) {
+        SGUtils.attr( $field, attr, turn );
+      }
+    );
     
     // если фокус до инициализации уже был на инпуте,
     // то сбрасываем его и выставляем заново через некоторое время,

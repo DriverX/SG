@@ -1,23 +1,15 @@
 (function() {
 
 var
-  $cont,
-  $form,
-  $input,
-  $sgcont,
-  $sgcont_items;
+  $cont;
 
 module("SG", {
   setup: function() {
     $cont = $("#qunit-fixture");
-    $form = $('<form action="http://go.mail.ru" method="get"><input type="submit"></form>').appendTo( $cont );
-    $input = $('<input id="q" name="q">').appendTo( $form );
-    $sgcont = $('<div id="sgcont">').appendTo( $cont );
-    $sgcont_items = $('<div id="sgcont_items">').appendTo( $sgcont );
   },
   teardown: function() {
     $cont.empty();
-    $cont = $form = $input = $sgcont = $sgcont_items = null;
+    $cont = null;
   }
 });
 
@@ -122,15 +114,81 @@ test("initialize elements", function() {
   sg.destroy();
 
   // чистим
-  $( field1 ).add( cont1 ).add( list1 ).add( form1 ).remove();
+  $cont.empty();
 
   expect( n );
 });
 
 
+asyncTest("on/off native autocomplete", function() {
+  var
+    n = 0,
+    attrs = ["autocomplete", "autocapitalize", "autocorrect"];
 
+  start();
 
+  $('<form action=""><input class="sgfield" name="q"></form><div class="sgcont"></div>').appendTo( $cont );
 
+  var
+    field = SG.$(".sgfield"),
+    cont = SG.$(".sgcont");
+
+  field.focus();
+
+  n += 9;
+  var sg = SG({
+      enabled: false,
+      field: field,
+      cont: cont
+    });
+  
+  equal(
+    SG.utils.attr( field, "autocomplete" ),
+    undefined,
+    'field.attr("autocomplete") is undefined'
+  );
+
+  sg.enable();
+  SG.utils.arrEach(
+    attrs,
+    function( attr ) {
+      equal(
+        SG.utils.attr( field, attr ),
+        "off",
+        'field.attr("' + attr + '") is off'
+      );
+    }
+  );
+  
+  stop();
+  setTimeout(function() {
+    ok( SG.utils.hasFocus( field ), "field has focus after enabling" );
+
+    start();
+
+    sg.disable();
+    SG.utils.arrEach(
+      attrs,
+      function( attr ) {
+        equal(
+          SG.utils.attr( field, attr ),
+          "on",
+          'field.attr("' + attr + '") is on'
+        );
+      }
+    );
+
+    stop();
+    setTimeout(function() {
+      ok( SG.utils.hasFocus( field ), "field has focus after disabling" );
+
+      start();
+    }, 50);
+  }, 50);
+  
+
+  expect( n );
+});
 
 
 
