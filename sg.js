@@ -2539,7 +2539,7 @@ Suggest.instances = {};
 Suggest.opts = {
   enabled: true,
   // field: "#q",
-  cont: "#sg, .sg",
+  cont: "#sg,.sg",
   // list: ".sg-items",
   // correction: true,
   // shiftX: 0,
@@ -2613,6 +2613,7 @@ Suggest.utils = SGUtils;
 window.SG = window.SG || Suggest;
 
 })( window );
+
 
 /**!
 * YASS 0.3.8 - The fastest CSS selectors JavaScript library

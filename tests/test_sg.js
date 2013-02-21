@@ -429,6 +429,66 @@ asyncTest("cache", function() {
 });
 
 
+asyncTest("value filter", function() {
+  $('<form action=""><input class="sgfield" name="q"></form><div class="sgcont"></div>').appendTo( $cont );
+
+  var
+    n = 0,
+    sg,
+    field = SG.$(".sgfield"),
+    cont = SG.$(".sgcont");
+
+  sg = SG({
+    field: field,
+    cont: cont,
+    delay: 10,
+    url: "data/test_sg_data.php?query={query}",
+    ajax: {
+      dataType: "json"
+    }
+  });
+
+  n += 4;
+  sg.on( SG.evt.passFilter, function( event, value ) {
+    switch( value ) {
+      case "foo":
+      case " foo bar ":
+        ok( true, "value passed" );
+        break;
+      default:
+        ok(false, "never call!");
+        break;
+    }
+  });
+  sg.on( SG.evt.failFilter, function( event, value ) {
+    switch( value ) {
+      case "":
+      case "   ":
+        ok(true, "value failed");
+        break;
+      default:
+        ok(false, "never call");
+        break;
+    }
+  });
+
+  field.focus();
+  field.value = "foo";
+  setTimeout(function() {
+    field.value = "";
+    setTimeout(function() {
+      field.value = " foo bar ";
+      setTimeout(function() {
+        field.value = "   ";
+        setTimeout(function() {
+          start();
+        }, 100);
+      }, 50);
+    }, 50);
+  }, 50);
+
+  expect( n );
+});
 
 
 
