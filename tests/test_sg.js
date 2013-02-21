@@ -395,28 +395,34 @@ asyncTest("cache", function() {
   field.focus();
   field.value = "foo";
  
-  n += 2;
+  n += 3;
   function test2() {
     sg.off();
 
     ok( sg._cache.has("foo"), "value 'foo' exists in cache")
     equal( sg._cache.i, 1, "cache size == 1" );
+    equal( sg._cache.get("foo")[0], "foo", "cache data correct" );
 
     field.value = "bar";
     stop();
     setTimeout(function() {
-      field.value = "baz";
       sg.on( SG.evt.valueChange, function() {
         sg.on( SG.evt.stopRequest, test3 );
       });
+      field.value = "baz";
     }, 60);
   }
 
-  n += 1;
+  n += 2;
   function test3() {
     equal( sg._cache.i, 1, "cache is flushed");
     start();
-    sg.off();
+
+    sg.flushCache();
+    equal( sg._cache.i, 0, "cache is flushed 2");
+
+    sg.destroy();
+    $cont.empty();
   }
   
   expect( n );
