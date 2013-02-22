@@ -2,11 +2,13 @@
 Поисковые подсказоньки
 
 ## Сборка
-Для сборки используется [grunt](https://github.com/gruntjs/grunt/). grunt уже установлен.
+Для сборки используется [grunt](http://gruntjs.com) v0.4.
 ```
 git clone https://github.com/DriverX/SG.git
 cd SG
-npm install grunt-replace
+npm install grunt-contrib-concat
+npm install grunt-text-replace
+npm install grunt-closure-tools
 grunt
 ls -l sg*
 ```
@@ -713,7 +715,6 @@ SG({
  * __scriptCharset__ - String кодировка в которую следует перевести ответ при `jsonp` запросах. default: `"utf-8"`
  * __timeout__ - Integer таймаут запроса, по истечении которого будет принудительно вызван `abort()`, default: `5000`
  * __stackSize__ - Integer максимальное одновременное кол-во запросов. default: `2`
- * __CORSDegrade__ - Если `true`, то при кроссдоменном запросе, который не смог выполниться из-за политик безопасности, может переключиться на jsonp метод и использвать его. default: `false`
 
 
 ### callbackParam
