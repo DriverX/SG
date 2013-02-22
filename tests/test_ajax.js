@@ -134,20 +134,7 @@ asyncTest("statuses", function() {
     SG.utils.format( dummy_url, {code: 404}),
     {
       error: function( event, statusText ) {
-        equal( statusText, "Not Found" );
-        start();
-      }
-    }
-  );
-  ajax.send();
-
-  n += 1;
-  stop();
-  ajax = SG.Ajax(
-    SG.utils.format( dummy_url, {code: 404}),
-    {
-      error: function( event, statusText ) {
-        equal( statusText, "Not Found" );
+        equal( statusText, "Not Found", "statusText == 'Not Found'" );
         start();
       }
     }
