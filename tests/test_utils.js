@@ -601,26 +601,36 @@ test("attr", function() {
     node2 = $("<a/>").appendTo("#qunit-fixture").attr("href", "foobar.html").get(0),
     node3 = $("<img border='200'/>").get(0);
 
-  equal( SG.utils.attr( node1, "title" ), "foo" );
+  equal( SG.utils.attr( node1, "title" ), "foo", "attr.title == 'foo'" );
   
-  equal( SG.utils.attr( node2, "href" ), "foobar.html" );
-  equal( SG.utils.attr( node3, "border" ), "200" );
+  equal( SG.utils.attr( node2, "href" ), "foobar.html", "attr.href == 'foobar.html'" );
+  equal( SG.utils.attr( node3, "border" ), "200", "attr.border == '200'" );
   
   SG.utils.attr( node1, "title", "bar" );
-  equal( SG.utils.attr( node1, "title" ), "bar" );
+  equal( SG.utils.attr( node1, "title" ), "bar", "attr.title == 'bar'" );
   SG.utils.attr( node2, "href", "baz.html" );
-  equal( SG.utils.attr( node2, "href" ), "baz.html" );
+  equal( SG.utils.attr( node2, "href" ), "baz.html", "attr.href == 'baz.html'" );
   SG.utils.attr( node3, "border", "123" );
-  equal( SG.utils.attr( node3, "border" ), "123" );
+  equal( SG.utils.attr( node3, "border" ), "123", "attr.border == '123'" );
 });
 
 
-test("hasFocus", function() {
-  var field1 = $("<input>").appendTo("#qunit-fixture").focus().get(0);
+asyncTest("hasFocus", function() {
+  var
+    n = 0,
+    field1 = $("<input>").appendTo("#qunit-fixture").focus().get(0);
 
-  ok( SG.utils.hasFocus( field1 ) );
+  n += 2;
+  ok( SG.utils.hasFocus( field1 ), "input is focused" );
   field1.blur();
-  ok( !SG.utils.hasFocus( field1 ) );
+  setTimeout(function() {
+    ok( !SG.utils.hasFocus( field1 ), "input hasn't focus" );
+    start();
+
+    $("#qunit-fixture").empty();
+  });
+
+  expect( n );
 });
 
 
@@ -629,11 +639,26 @@ test("contains", function() {
     $incont = $("<div>").appendTo( $cont ),
     $inincont = $("<span>").appendTo( $incont );
   
-  ok( SG.utils.contains( $cont.get(0), $incont.get(0) ) );
-  ok( SG.utils.contains( $cont.get(0), $inincont.get(0) ) );
-  ok( SG.utils.contains( $incont.get(0), $inincont.get(0) ) );
-  ok( !SG.utils.contains( $inincont.get(0), $incont.get(0) ) );
-  ok( !SG.utils.contains( $incont.get(0), $cont.get(0) ) );
+  ok(
+    SG.utils.contains( $cont.get(0), $incont.get(0) ),
+    "$cont contains $div"
+  );
+  ok(
+    SG.utils.contains( $cont.get(0), $inincont.get(0) ),
+    "$cont contains $span"
+  );
+  ok(
+    SG.utils.contains( $incont.get(0), $inincont.get(0) ),
+    "$div contains $span"
+  );
+  ok(
+    !SG.utils.contains( $inincont.get(0), $incont.get(0) ),
+    "$span not contains $div"
+  );
+  ok(
+    !SG.utils.contains( $incont.get(0), $cont.get(0) ),
+    "$div not contains $cont"
+  );
 });
 
 

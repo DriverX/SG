@@ -262,7 +262,10 @@ asyncTest("times", function() {
     {
       dataType: "json",
       success: function( event, response ) {
-        ok( this.elapsedTime >= 500 );
+        ok(
+          this.elapsedTime >= 490,
+          "elapsedTime >= 490: " + this.elapsedTime
+        );
         deepEqual( response, {sleep: 500} );
         start();
       }
@@ -277,7 +280,10 @@ asyncTest("times", function() {
     {
       dataType: "jsonp",
       success: function( event, response ) {
-        ok( this.elapsedTime >= 500 );
+        ok(
+          this.elapsedTime >= 490,
+          "elapsedTime >= 490: " + this.elapsedTime
+        );
         deepEqual( response, {sleep: 500} );
         start();
       }
@@ -292,9 +298,19 @@ asyncTest("times", function() {
     {
       timeout: 1000,
       error: function( event, statusText ) {
-        ok( this.elapsedTime >= 1000 );
-        ok( this.elapsedTime < 1100 );
-        equal( statusText, "timeout" );
+        ok(
+          this.elapsedTime >= 990,
+          "elapsedTime >= 990: " + this.elapsedTime
+        );
+        ok(
+          this.elapsedTime < 1100,
+          "elapsedTime < 1100: " + this.elapsedTime
+        );
+        equal(
+          statusText,
+          "timeout",
+          "statusText == 'timeout': " + statusText
+        );
         start();
       }
     }
@@ -309,8 +325,14 @@ asyncTest("times", function() {
       dataType: "jsonp",
       timeout: 1000,
       error: function( event, statusText ) {
-        ok( this.elapsedTime >= 1000 );
-        ok( this.elapsedTime < 1100 );
+        ok(
+          this.elapsedTime >= 990,
+          "jsonp: elapsedTime >= 990: " + this.elapsedTime
+        );
+        ok(
+          this.elapsedTime < 1100,
+          "jsonp: elapsedTime < 1100: " + this.elapsedTime
+        );
         equal( statusText, "timeout" );
         start();
       }
@@ -344,14 +366,44 @@ asyncTest("instance properties", function() {
   n += 8;
   ajax = SG.Ajax("data/test_ajax_json.json", {
     success: function() {
-      equal( this.url, "data/test_ajax_json.json" );
-      equal( this.readyState, 4 );
-      equal( this.status, 200 );
-      equal( this.statusText, "success" );
-      ok( this.elapsedTime > 0 );
-      equal( this.endTime - this.startTime, this.elapsedTime );
-      equal( SG.utils.trim( this.responseText ), '{"foo": "bar"}' );
-      equal( this.responseXml, undefined );
+      equal(
+        this.url, "data/test_ajax_json.json",
+        "url == 'data/test_ajax_json.json': " + this.url
+      );
+      equal(
+        this.readyState,
+        4,
+        "readyState == 4: " + this.readyState 
+      );
+      equal(
+        this.status,
+        200,
+        "status == 200: " + this.status
+      );
+      equal(
+        this.statusText,
+        "success",
+        "statusText == 'success': " + this.statusText
+      );
+      ok(
+        this.elapsedTime > 0,
+        "elapsedTime > 0: " + this.elapsedTime
+      );
+      equal(
+        this.endTime - this.startTime,
+        this.elapsedTime,
+        "calculate elapsedTime from endTime and startTime"
+      );
+      equal(
+        SG.utils.trim( this.responseText ),
+        '{"foo": "bar"}',
+        "responseText == '{\"foo\": \"bar\"}'"
+      );
+      equal(
+        this.responseXml,
+        undefined,
+        "responseXml is undefined"
+      );
 
       start();
     }
@@ -448,8 +500,16 @@ asyncTest("abortation", function() {
   stop();
   var ajax2 = SG.Ajax("data/test_ajax_times.php?sleep=1000", {
     error: function( event, statusText ) {
-      equal( statusText, "canceled" );
-      equal( this.readyState, 0 );
+      equal(
+        statusText,
+        "canceled",
+        "statusText == 'canceled': " + statusText
+      );
+      equal(
+        this.readyState,
+        0,
+        "readyState == 0: " + this.readyState
+      );
       equal( this.status, SG.Ajax.CANCELED );
       equal( this.responseText, undefined );
       equal( this.responseXml, undefined );
