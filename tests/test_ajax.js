@@ -510,11 +510,29 @@ asyncTest("abortation", function() {
         0,
         "readyState == 0: " + this.readyState
       );
-      equal( this.status, SG.Ajax.CANCELED );
-      equal( this.responseText, undefined );
-      equal( this.responseXml, undefined );
-      ok( this.elapsedTime >= 500 );
-      ok( this.elapsedTime < 1000 );
+      equal(
+        this.status,
+        SG.Ajax.CANCELED,
+        "status == " + SG.Ajax.CANCELED
+      );
+      equal(
+        this.responseText,
+        undefined,
+        "responseText is undefined"
+      );
+      equal(
+        this.responseXml,
+        undefined,
+        "responseXml is undefined"
+      );
+      ok(
+        this.elapsedTime >= 490,
+        "elapsedTime >= 490: " + this.elapsedTime
+      );
+      ok(
+        this.elapsedTime < 1000,
+        "elapsedTime < 1000: " + this.elapsedTime
+      );
 
       start();
     }
@@ -532,10 +550,24 @@ asyncTest("abortation", function() {
       equal( statusText, "canceled" );
       equal( this.readyState, 0 );
       equal( this.status, SG.Ajax.CANCELED );
-      equal( this.responseText, undefined );
-      equal( this.responseXml, undefined );
-      ok( this.elapsedTime >= 500 );
-      ok( this.elapsedTime < 1000 );
+      equal(
+        this.responseText,
+        undefined,
+        "responseText is undefined"
+      );
+      equal(
+        this.responseXml,
+        undefined,
+        "responseXml is undefined"
+      );
+      ok(
+        this.elapsedTime >= 490,
+        "elapsedTime >= 490: " + this.elapsedTime
+      );
+      ok(
+        this.elapsedTime < 1000,
+        "elapsedTime < 1000: " + this.elapsedTime
+      );
 
       start();
     }
