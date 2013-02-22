@@ -415,14 +415,40 @@ asyncTest("instance properties", function() {
   ajax = SG.Ajax("data/test_ajax_jsonp.php", {
     dataType: "jsonp",
     success: function() {
-      equal( this.url, "data/test_ajax_jsonp.php" );
-      equal( this.readyState, 4 );
-      equal( this.status, 200 );
+      equal(
+        this.url, "data/test_ajax_jsonp.php",
+        "jsonp: url == 'data/test_ajax_jsonp.php': " + this.url
+      );
+      equal(
+        this.readyState,
+        4,
+        "jsonp: readyState == 4: " + this.readyState
+      );
+      equal(
+        this.status,
+        200,
+        "jsonp: status == 200: " + this.status
+      );
       equal( this.statusText, "success" );
-      ok( this.elapsedTime > 0 );
-      equal( this.endTime - this.startTime, this.elapsedTime );
-      equal( this.responseText, undefined );
-      equal( this.responseXml, undefined );
+      ok(
+        this.elapsedTime > 0,
+        "jsonp: elapsedTime > 0: " + this.elapsedTime
+      );
+      equal(
+        this.endTime - this.startTime,
+        this.elapsedTime,
+        "jsonp: calculate elapsedTime from endTime and startTime"
+      );
+      equal(
+        this.responseText,
+        undefined,
+        "jsonp: responseText is undefined"
+      );
+      equal(
+        this.responseXml,
+        undefined,
+        "responseXml is undefined"
+      );
 
       start();
     }
