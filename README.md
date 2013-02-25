@@ -6,6 +6,7 @@
 ```
 git clone https://github.com/DriverX/SG.git
 cd SG
+npm install grunt
 npm install grunt-contrib-concat
 npm install grunt-text-replace
 npm install grunt-closure-tools
