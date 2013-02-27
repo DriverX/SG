@@ -65,8 +65,14 @@ var options = {
     return data;
   },
   item: ".go-suggests__suggest-tmpl",
-  result : function(itemData) {
-    return itemData.text;
+  result: function(itemData) {
+    var result;
+    if( itemData.type === "site" ) {
+      result = itemData.site;
+    } else {
+      result = itemData.text;
+    }
+    return result;
   },
   select : function(data) {
     var itemData = data.itemData, result = data.result, value = data.value, srchForm = this.form;
